@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>One Wish Willow</title>
+<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+<style>
+/* ─── Reset & base ────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; background: #050505; }
+
+:root {
+  --red:   #ff4444;
+  --glow:  #ff1a1a;
+  --dark:  #050505;
+  --font:  'VT323', 'Courier New', monospace;
+}
+
+body {
+  font-family: var(--font);
+  color: var(--red);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* ─── CRT scanlines ───────────────────────────────────────── */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px, transparent 3px,
+    rgba(0,0,0,0.12) 3px, rgba(0,0,0,0.12) 4px
+  );
+  pointer-events: none; z-index: 9000;
+}
+
+/* CRT phosphor bleed */
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(255,5,5,0.016) 0px, rgba(255,5,5,0.016) 2px,
+    transparent 2px, transparent 4px
+  );
+  pointer-events: none; z-index: 9001;
+}
+
+/* ─── CRT vignette ────────────────────────────────────────── */
+#vignette {
+  position: fixed; inset: 0;
+  background: radial-gradient(ellipse 92% 92% at 50% 50%,
+    transparent 38%, rgba(0,0,0,0.55) 72%, rgba(0,0,0,0.90) 100%);
+  pointer-events: none; z-index: 8900;
+}
+
+/* CRT curved-glass edge shadow */
+#crt-curve {
+  position: fixed; inset: 0;
+  border-radius: 5%;
+  box-shadow: inset 0 0 120px rgba(0,0,0,0.72),
+              inset 0 0 40px rgba(180,0,0,0.04);
+  pointer-events: none; z-index: 8800;
+}
+
+/* ─── VHS moving scan line ────────────────────────────────── */
+#vhs-line {
+  position: fixed; left: 0; width: 100%; height: 3px;
+  background: linear-gradient(to right,
+    transparent, rgba(255,30,30,0.045) 20%,
+    rgba(255,30,30,0.08) 50%,
+    rgba(255,30,30,0.045) 80%, transparent);
+  pointer-events: none; z-index: 9002;
+  animation: vhsScan 5s linear infinite;
+}
+@keyframes vhsScan {
+  0%   { top: -4px; }
+  100% { top: 100vh; }
+}
+
+/* ─── VHS film grain ──────────────────────────────────────── */
+#film-grain {
+  position: fixed; inset: 0;
+  opacity: 0.04;
+  mix-blend-mode: overlay;
+  pointer-events: none; z-index: 8700;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+  animation: grain 0.12s steps(4) infinite;
+}
+@keyframes grain {
+  0%  { transform: translate(0,0); }
+  25% { transform: translate(-2%, 1%); }
+  50% { transform: translate(1%,-2%); }
+  75% { transform: translate(-1%,-1%); }
+}
+
+/* ─── Screen flicker ──────────────────────────────────────── */
+#app { animation: flicker 10s infinite; }
+@keyframes flicker {
+  0%, 91%, 100% { opacity: 1; }
+  92% { opacity: 0.83; }
+  94% { opacity: 0.97; }
+  96% { opacity: 0.79; }
+  98% { opacity: 0.93; }
+}
+
+/* ─── Blackout overlay ────────────────────────────────────── */
+#blackout {
+  position: fixed; inset: 0;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 7000;
+  transition: opacity 1.6s ease-in;
+}
+#blackout.active { opacity: 0.94; }
+
+/* ─── Red flash (shaking phase) ───────────────────────────── */
+#red-flash {
+  position: fixed; inset: 0;
+  background: rgba(255,0,0,0.18);
+  mix-blend-mode: screen;
+  opacity: 0;
+  pointer-events: none; z-index: 7100;
+}
+#red-flash.active {
+  animation: redPulse 0.4s infinite;
+}
+@keyframes redPulse {
+  0%  { opacity: 0; }
+  25% { opacity: 1; }
+  50% { opacity: 0; }
+  75% { opacity: 0.7; }
+  100%{ opacity: 0; }
+}
+
+/* ─── App layout ──────────────────────────────────────────── */
+#app {
+  position: relative;
+  width: 100%;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: clamp(1.5rem, 4vw, 2.5rem) 1rem clamp(1rem, 3vw, 2rem);
+  overflow: hidden;
+  z-index: 1;
+}
+
+/* ─── Dynamic background ──────────────────────────────────── */
+#bg {
+  position: fixed; inset: 0; z-index: 0;
+  transition: background 1.2s ease;
+}
+.bg-idle     { background: radial-gradient(ellipse 80% 80% at 50% 50%, #120000 0%, #050505 100%); }
+.bg-charging { background: radial-gradient(ellipse 80% 80% at 50% 50%, #1c0000 0%, #080000 100%); }
+.bg-shaking  { background: radial-gradient(ellipse 80% 80% at 50% 50%, #250000 0%, #0b0000 100%); }
+.bg-dark     { background: radial-gradient(ellipse 80% 80% at 50% 50%, #070000 0%, #020000 100%); }
+
+/* ─── Ambient red glow behind willow ─────────────────────── */
+#ambient-glow {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 55vmin; height: 55vmin;
+  background: radial-gradient(circle,
+    rgba(255,26,26,0.18) 0%,
+    rgba(255,26,26,0.06) 40%,
+    transparent 70%);
+  filter: blur(30px);
+  mix-blend-mode: screen;
+  pointer-events: none; z-index: 2;
+  animation: glowPulse 3s ease-in-out infinite;
+}
+@keyframes glowPulse {
+  0%, 100% { opacity: 0.5; transform: translate(-50%,-50%) scale(0.95); }
+  50%       { opacity: 0.9; transform: translate(-50%,-50%) scale(1.05); }
+}
+.phase-charging #ambient-glow { animation-duration: 2s; opacity: 0.8; }
+.phase-shaking  #ambient-glow { animation-duration: 0.4s; opacity: 1; }
+
+/* ─── Radial burst rays ───────────────────────────────────── */
+#radial-burst {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 62vmin; height: 62vmin;
+  pointer-events: none; z-index: 1;
+  animation: spin 18s linear infinite;
+  animation-play-state: paused;
+  opacity: 0.07;
+  transition: opacity 1s;
+}
+.phase-charging #radial-burst { animation-play-state: running; opacity: 0.18; }
+.phase-shaking  #radial-burst { animation-duration: 2.5s; animation-play-state: running; opacity: 0.28; }
+@keyframes spin { to { transform: translate(-50%,-50%) rotate(360deg); } }
+
+/* ─── Particles ───────────────────────────────────────────── */
+#particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  overflow: hidden;
+}
+.particle {
+  position: absolute;
+  background: #ff1a1a;
+  box-shadow: 0 0 4px rgba(255,26,26,0.9);
+  border-radius: 0;
+  animation: particleFly linear forwards;
+}
+@keyframes particleFly {
+  0%   { opacity: 0; transform: translateY(0) translateX(0); }
+  15%  { opacity: 0.9; }
+  100% { opacity: 0; transform: translateY(-50px) translateX(var(--drift, 10px)); }
+}
+
+/* ─── Header ──────────────────────────────────────────────── */
+#header {
+  text-align: center;
+  z-index: 10;
+  flex-shrink: 0;
+  transition: opacity 0.8s;
+}
+#title {
+  font-size: clamp(1.8rem, 6.5vw, 3.8rem);
+  letter-spacing: 0.2em;
+  line-height: 1.1;
+  text-shadow:
+    0 0 10px rgba(255,50,50,1),
+    0 0 22px rgba(255,0,0,0.7),
+    0 0 45px rgba(255,0,0,0.4);
+}
+#subtitle {
+  font-size: clamp(0.65rem, 2.2vw, 0.95rem);
+  letter-spacing: 0.35em;
+  opacity: 0.6;
+  margin-top: 0.3rem;
+  text-shadow: 0 0 8px rgba(255,50,50,0.8);
+}
+.phase-charging #header, .phase-shaking #header { opacity: 0.3; }
+.phase-fading   #header, .phase-success  #header { opacity: 0; }
+
+/* ─── Willow stage ────────────────────────────────────────── */
+#willow-stage {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 0;
+  z-index: 10;
+}
+
+/* ─── Willow stick ────────────────────────────────────────── */
+#willow-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#willow-float {
+  animation: willowFloat 4.5s ease-in-out infinite;
+}
+#willow-rotate {
+  animation: willowRotate 6s ease-in-out infinite;
+}
+#willow-svg {
+  width: clamp(220px, 58vw, 380px);
+  height: clamp(52px, 11vh, 84px);
+  display: block;
+  overflow: visible;
+  filter: drop-shadow(0 0 18px rgba(255,50,0,0.45)) drop-shadow(0 0 36px rgba(200,0,0,0.28));
+  transition: filter 0.6s;
+}
+.phase-charging #willow-svg {
+  filter: drop-shadow(0 0 28px rgba(255,60,0,0.72)) drop-shadow(0 0 55px rgba(200,0,0,0.45));
+}
+.phase-shaking #willow-svg {
+  filter: drop-shadow(0 0 42px rgba(255,80,0,0.9)) drop-shadow(0 0 80px rgba(255,0,0,0.6));
+}
+
+@keyframes willowFloat {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50%       { transform: translateY(-18px) scale(1.025); }
+}
+@keyframes willowRotate {
+  0%, 100% { transform: rotateZ(-30deg); }
+  50%       { transform: rotateZ(-18deg); }
+}
+
+/* Accelerate animations in charging/shaking phases */
+.phase-charging #willow-float  { animation-duration: 2.8s; }
+.phase-charging #willow-rotate { animation-duration: 3s; }
+.phase-shaking  #willow-float  { animation-duration: 0.2s; animation-name: willowShake; }
+.phase-shaking  #willow-rotate { animation-duration: 0.4s; }
+.phase-breaking #willow-float  { animation: none; opacity: 0; transition: opacity 0.1s; }
+.phase-breaking #willow-rotate { animation: none; }
+.phase-fading   #willow-float  { animation: none; opacity: 0; }
+.phase-success  #willow-float  { animation: none; opacity: 0; }
+
+@keyframes willowShake {
+  0%   { transform: translate(-5px, -2px); }
+  12%  { transform: translate(5px,  2px); }
+  25%  { transform: translate(-4px, 2px); }
+  37%  { transform: translate(4px, -2px); }
+  50%  { transform: translate(-3px, 1px); }
+  62%  { transform: translate(3px, -1px); }
+  75%  { transform: translate(-2px, 1px); }
+  87%  { transform: translate(2px,  -1px); }
+  100% { transform: translate(0,    0); }
+}
+
+/* Broken pieces — positioned over willow */
+.shard-piece {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: clamp(220px, 58vw, 380px);
+  height: clamp(52px, 11vh, 84px);
+  overflow: visible;
+  opacity: 0;
+}
+.shard-piece svg {
+  width: 100%; height: 100%;
+  overflow: visible;
+}
+
+/* ─── Input section ───────────────────────────────────────── */
+#input-section {
+  width: 100%;
+  max-width: 480px;
+  text-align: center;
+  z-index: 10;
+  flex-shrink: 0;
+  transition: opacity 0.6s, transform 0.6s;
+}
+.phase-shaking  #input-section { opacity: 0.2; }
+.phase-breaking #input-section,
+.phase-fading   #input-section,
+.phase-success  #input-section { opacity: 0; transform: translateY(20px); pointer-events: none; }
+
+#wish-label {
+  font-size: clamp(0.85rem, 2.8vw, 1.2rem);
+  letter-spacing: 0.28em;
+  opacity: 0.7;
+  margin-bottom: 0.8rem;
+  text-shadow: 0 0 8px rgba(255,50,50,0.8);
+}
+.phase-charging #wish-label { opacity: 0.4; }
+
+#wish-input {
+  width: 100%;
+  background: rgba(10,0,0,0.85);
+  border: 1px solid rgba(255,50,50,0.4);
+  color: #ff4444;
+  font-family: var(--font);
+  font-size: clamp(1.2rem, 3.5vw, 1.6rem);
+  text-align: left;
+  letter-spacing: 0.12em;
+  outline: none;
+  padding: 0.7rem 1rem;
+  caret-color: #ff4444;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  margin-bottom: 1rem;
+  border-radius: 0;
+  -webkit-appearance: none;
+  position: relative;
+}
+#wish-input::placeholder { color: rgba(255,68,68,0.3); }
+#wish-input:focus {
+  border-color: rgba(255,50,50,0.85);
+  box-shadow: 0 0 12px rgba(255,0,0,0.3), inset 0 0 8px rgba(255,0,0,0.07);
+}
+#wish-input:disabled { opacity: 0.4; cursor: not-allowed; }
+#wish-input::before {
+  content: '';
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 2px;
+  height: 1.2em;
+  background: #ff4444;
+  animation: cursor-blink 1s step-end infinite;
+}
+
+#grant-btn {
+  width: 100%;
+  background: rgba(10,0,0,0.9);
+  border: 2px solid rgba(255,26,26,0.7);
+  color: #ff4444;
+  font-family: var(--font);
+  font-size: clamp(1.3rem, 4vw, 1.9rem);
+  letter-spacing: 0.25em;
+  padding: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 0 14px rgba(255,0,0,0.2), inset 0 0 10px rgba(255,0,0,0.06);
+  border-radius: 0;
+  -webkit-appearance: none;
+}
+#grant-btn:hover:not(:disabled) {
+  border-color: #ff1a1a;
+  color: #ffe0e0;
+  box-shadow: 0 0 28px rgba(255,0,0,0.5), 0 0 50px rgba(255,0,0,0.25),
+              inset 0 0 18px rgba(255,0,0,0.12);
+  text-shadow: 0 0 10px rgba(255,60,60,1), 0 0 22px rgba(255,0,0,0.7);
+}
+#grant-btn:active:not(:disabled) { transform: scale(0.97); }
+#grant-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.phase-charging #grant-btn {
+  animation: btnPulse 1.2s ease-in-out infinite;
+}
+@keyframes btnPulse {
+  0%, 100% { box-shadow: 0 0 14px rgba(255,0,0,0.2); }
+  50%       { box-shadow: 0 0 32px rgba(255,0,0,0.55), 0 0 60px rgba(255,0,0,0.2); }
+}
+
+/* ─── Success message ─────────────────────────────────────── */
+#success-msg {
+  position: fixed; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  z-index: 8000;
+  text-align: center;
+  padding: 2rem;
+  pointer-events: none;
+  opacity: 0;
+}
+#success-msg.show { pointer-events: auto; }
+
+.success-line {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+}
+.success-line.visible { opacity: 1; transform: translateY(0); }
+
+.success-big {
+  font-size: clamp(2rem, 7.5vw, 4.5rem);
+  letter-spacing: 0.25em;
+  line-height: 1.15;
+  text-shadow:
+    0 0 14px rgba(255,60,60,1),
+    0 0 30px rgba(255,0,0,0.8),
+    0 0 60px rgba(255,0,0,0.5),
+    0 0 100px rgba(200,0,0,0.3);
+}
+.success-mid {
+  font-size: clamp(1.1rem, 3.2vw, 1.8rem);
+  letter-spacing: 0.18em;
+  opacity: 0.8;
+  margin-top: 0.3rem;
+}
+.success-sep {
+  font-size: clamp(0.85rem, 2vw, 1.1rem);
+  opacity: 0.3;
+  letter-spacing: 0.3em;
+  margin: 0.5rem 0;
+}
+.success-small {
+  font-size: clamp(0.85rem, 2.2vw, 1.1rem);
+  letter-spacing: 0.22em;
+  opacity: 0.55;
+}
+
+/* ─── Make Another Wish button ─────────────────────────────── */
+#another-wish-btn {
+  margin-top: 2rem;
+  background: rgba(10,0,0,0.9);
+  border: 2px solid rgba(255,26,26,0.7);
+  color: #ff4444;
+  font-family: var(--font);
+  font-size: clamp(1rem, 3vw, 1.4rem);
+  letter-spacing: 0.2em;
+  padding: 0.8rem 2rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 0 14px rgba(255,0,0,0.2);
+  border-radius: 0;
+  -webkit-appearance: none;
+}
+#another-wish-btn:hover {
+  border-color: #ff1a1a;
+  color: #ffe0e0;
+  box-shadow: 0 0 28px rgba(255,0,0,0.5), 0 0 50px rgba(255,0,0,0.25);
+  text-shadow: 0 0 10px rgba(255,60,60,1), 0 0 22px rgba(255,0,0,0.7);
+}
+#another-wish-btn:active {
+  transform: scale(0.97);
+}
+
+/* ─── Denied message ─────────────────────────────────────── */
+#denied-msg {
+  position: fixed; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  z-index: 8000;
+  text-align: center;
+  padding: 2rem;
+  pointer-events: none;
+  opacity: 0;
+}
+#denied-msg.show { pointer-events: auto; }
+
+#another-wish-btn-denied {
+  margin-top: 2rem;
+  background: rgba(10,0,0,0.9);
+  border: 2px solid rgba(255,26,26,0.7);
+  color: #ff4444;
+  font-family: var(--font);
+  font-size: clamp(1rem, 3vw, 1.4rem);
+  letter-spacing: 0.2em;
+  padding: 0.8rem 2rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 0 14px rgba(255,0,0,0.2);
+  border-radius: 0;
+  -webkit-appearance: none;
+}
+#another-wish-btn-denied:hover {
+  border-color: #ff1a1a;
+  color: #ffe0e0;
+  box-shadow: 0 0 28px rgba(255,0,0,0.5), 0 0 50px rgba(255,0,0,0.25);
+  text-shadow: 0 0 10px rgba(255,60,60,1), 0 0 22px rgba(255,0,0,0.7);
+}
+#another-wish-btn-denied:active {
+  transform: scale(0.97);
+}
+
+/* Glitch effect */
+.glitch { position: relative; display: inline-block; }
+.glitch::before, .glitch::after {
+  content: attr(data-text);
+  position: absolute; inset: 0;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.glitch::before {
+  color: #ff0055;
+  animation: glitch1 3.5s infinite;
+}
+.glitch::after {
+  color: #ff6600;
+  animation: glitch2 3.5s infinite 0.06s;
+}
+@keyframes glitch1 {
+  0%        { clip-path: inset(75% 0 10% 0); transform: translate(-3px,0); }
+  15%       { clip-path: inset(10% 0 65% 0); transform: translate(3px,0); }
+  30%       { clip-path: inset(45% 0 35% 0); transform: translate(-2px,0); }
+  45%       { clip-path: inset(25% 0 55% 0); transform: translate(2px,0); }
+  60%, 100% { clip-path: inset(0 0 0 0);     transform: translate(0,0); }
+}
+@keyframes glitch2 {
+  0%        { clip-path: inset(15% 0 55% 0); transform: translate(3px,0); color: #ff0055; }
+  20%       { clip-path: inset(55% 0 15% 0); transform: translate(-3px,0); }
+  40%       { clip-path: inset(5%  0 75% 0); transform: translate(2px,0); }
+  60%, 100% { clip-path: inset(0 0 0 0);     transform: translate(0,0); color: inherit; }
+}
+
+/* ─── Mute button ─────────────────────────────────────────── */
+#mute-btn {
+  position: fixed; bottom: 1.25rem; right: 1.25rem;
+  z-index: 9100;
+  width: 44px; height: 44px;
+  background: rgba(8,0,0,0.85);
+  border: 1px solid rgba(255,26,26,0.35);
+  color: rgba(255,68,68,0.7);
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+  border-radius: 2px;
+}
+#mute-btn:hover {
+  border-color: rgba(255,26,26,0.7);
+  color: #ff4444;
+  box-shadow: 0 0 14px rgba(255,0,0,0.3);
+}
+</style>
+</head>
+<body>
+
+<!-- Dynamic background -->
+<div id="bg" class="bg-idle"></div>
+<!-- CRT / VHS layers -->
+<div id="vignette"></div>
+<div id="crt-curve"></div>
+<div id="vhs-line"></div>
+<div id="film-grain"></div>
+<!-- Overlay effects -->
+<div id="blackout"></div>
+<div id="red-flash"></div>
+
+<!-- Main app -->
+<div id="app">
+  <!-- HEADER -->
+  <header id="header">
+    <h1 id="title">ONE WISH WILLOW</h1>
+    <p id="subtitle">ONE WISH. ONE CONSEQUENCE.</p>
+  </header>
+
+  <!-- WILLOW STAGE -->
+  <div id="willow-stage">
+    <div id="ambient-glow"></div>
+
+    <!-- Radial burst rays (SVG) -->
+    <svg id="radial-burst" viewBox="-1 -1 2 2" style="overflow:visible;" aria-hidden="true"></svg>
+
+    <!-- Particle container -->
+    <div id="particles"></div>
+
+    <!-- Willow stick -->
+    <div id="willow-container">
+      <div id="willow-float">
+        <div id="willow-rotate">
+          <svg id="willow-svg" viewBox="0 0 300 80" aria-label="The One Wish Willow">
+            <defs>
+              <linearGradient id="woodGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%"   stop-color="#2e1a0a"/>
+                <stop offset="40%"  stop-color="#3a2010"/>
+                <stop offset="100%" stop-color="#160b04"/>
+              </linearGradient>
+              <filter id="wglow">
+                <feGaussianBlur stdDeviation="2.5" result="b"/>
+                <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+            </defs>
+            <g id="stick-whole" filter="url(#wglow)"></g>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Broken pieces (hidden until breaking) -->
+      <!-- LEFT half — jagged break edge -->
+      <div class="shard-piece" id="piece-top">
+        <svg viewBox="0 0 300 80" style="overflow:visible;">
+          <defs>
+            <clipPath id="clip-top">
+              <path d="M 0,0 L 145,0 L 155,8 L 145,16 L 155,24 L 145,32 L 155,40 L 145,48 L 155,56 L 145,64 L 155,72 L 150,80 L 0,80 Z"/>
+            </clipPath>
+            <filter id="wglow-t">
+              <feGaussianBlur stdDeviation="2" result="b"/>
+              <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <g id="stick-top" clip-path="url(#clip-top)" filter="url(#wglow-t)"></g>
+        </svg>
+      </div>
+      <!-- RIGHT half — jagged break edge (mirror) -->
+      <div class="shard-piece" id="piece-bot">
+        <svg viewBox="0 0 300 80" style="overflow:visible;">
+          <defs>
+            <clipPath id="clip-bot">
+              <path d="M 150,0 L 155,8 L 145,16 L 155,24 L 145,32 L 155,40 L 145,48 L 155,56 L 145,64 L 155,72 L 150,80 L 300,80 L 300,0 Z"/>
+            </clipPath>
+            <filter id="wglow-b">
+              <feGaussianBlur stdDeviation="2" result="b"/>
+              <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <g id="stick-bot" clip-path="url(#clip-bot)" filter="url(#wglow-b)"></g>
+        </svg>
+      </div>
+      <!-- Shard splinters -->
+      <div id="shards"></div>
+    </div>
+  </div>
+
+  <!-- INPUT SECTION -->
+  <section id="input-section">
+    <p id="wish-label">WHAT DO YOU WISH FOR?</p>
+    <input id="wish-input" type="text" maxlength="120" placeholder="ENTER YOUR WISH..." autocomplete="off" spellcheck="false"/>
+    <button id="grant-btn">GRANT WISH</button>
+  </section>
+</div>
+
+<!-- SUCCESS MESSAGE -->
+<div id="success-msg">
+  <div class="success-line success-big"><span class="glitch" data-text="YOUR WISH">YOUR WISH</span></div>
+  <div class="success-line success-big" style="transition-delay:0.9s"><span class="glitch" data-text="HAS BEEN GRANTED">HAS BEEN GRANTED</span></div>
+  <div class="success-line success-sep" style="transition-delay:1.8s">─────────────────────</div>
+  <div class="success-line success-mid" style="transition-delay:2.7s">PLEASE WAIT 24 HOURS</div>
+  <div class="success-line success-mid" style="transition-delay:3.3s">TO SEE EFFECT</div>
+  <div class="success-line success-sep" style="transition-delay:4.0s">─────────────────────</div>
+  <div class="success-line success-small" style="transition-delay:4.8s">THE WILLOW HAS HEARD YOU.</div>
+  <button id="another-wish-btn" style="transition-delay:0.2s" class="success-line">MAKE ANOTHER WISH</button>
+</div>
+
+<!-- DENIED MESSAGE -->
+<div id="denied-msg">
+  <div class="success-line success-big"><span class="glitch" data-text="YOUR WISH">YOUR WISH</span></div>
+  <div class="success-line success-big" style="transition-delay:0.9s"><span class="glitch" data-text="WAS NOT GRANTED">WAS NOT GRANTED</span></div>
+  <div class="success-line success-sep" style="transition-delay:1.8s">─────────────────────</div>
+  <div class="success-line success-small" style="transition-delay:2.7s">THE WILLOW DOES NOT FAVOUR YOUR WISH</div>
+  <div class="success-line success-sep" style="transition-delay:3.5s">─────────────────────</div>
+  <button id="another-wish-btn-denied" style="transition-delay:0.2s" class="success-line">MAKE ANOTHER WISH</button>
+</div>
+
+<!-- MUTE BUTTON -->
+<button id="mute-btn" title="Toggle sound" aria-label="Toggle sound">🔇</button>
+
+<script>
+"use strict";
+// ─── Willow SVG paths (horizontal baton, viewBox 0 0 300 80) ─────
+// Reference: thick diagonal dark stick with hard bright-red pixel outline,
+//            rough/splintered ends, dark charcoal body, vertical grain.
+function stickSVG() {
+  // Body outline path — stadium/capsule shape, thick proportions
+  const body = "M24 56 Q6 50 6 40 Q6 28 24 24 L276 24 Q294 24 294 40 Q294 56 276 56 Z";
+  return `
+    <!-- === DROP SHADOW for depth === -->
+    <path d="${body}" fill="#080402" transform="translate(3,4)"/>
+
+    <!-- === MAIN DARK BODY (charcoal, like reference) === -->
+    <path d="${body}" fill="#1c1008"/>
+
+    <!-- === SUBTLE GRADIENT SURFACE SHADING === -->
+    <path d="M24 26 Q150 23 276 26 L276 38 Q150 36 24 38 Z" fill="rgba(80,38,14,0.45)"/>
+
+    <!-- === WOOD GRAIN TEXTURE — vertical lines === -->
+    <line x1="52"  y1="26" x2="52"  y2="54" stroke="#0a0502" stroke-width="1.5" opacity="0.7"/>
+    <line x1="85"  y1="25" x2="85"  y2="55" stroke="#0a0502" stroke-width="1"   opacity="0.55"/>
+    <line x1="118" y1="24" x2="118" y2="56" stroke="#0d0603" stroke-width="1.5" opacity="0.65"/>
+    <line x1="150" y1="24" x2="150" y2="56" stroke="#0a0502" stroke-width="1"   opacity="0.5"/>
+    <line x1="182" y1="24" x2="182" y2="56" stroke="#0d0603" stroke-width="1.5" opacity="0.65"/>
+    <line x1="215" y1="25" x2="215" y2="55" stroke="#0a0502" stroke-width="1"   opacity="0.55"/>
+    <line x1="248" y1="26" x2="248" y2="54" stroke="#0a0502" stroke-width="1.5" opacity="0.7"/>
+
+    <!-- === LEFT ROUGH END — jagged splinter fraying === -->
+    <polyline points="10,33 18,30 14,37 20,35 16,42 22,40 17,47 23,44"
+              fill="none" stroke="#2a1408" stroke-width="1.8" stroke-linejoin="round" opacity="0.85"/>
+    <!-- left end face shading -->
+    <path d="M24 25 Q8 30 6 40 Q8 50 24 55" fill="rgba(0,0,0,0.35)"/>
+
+    <!-- === RIGHT ROUGH END — jagged splinter fraying === -->
+    <polyline points="290,33 282,30 286,37 280,35 284,42 278,40 283,47 277,44"
+              fill="none" stroke="#2a1408" stroke-width="1.8" stroke-linejoin="round" opacity="0.85"/>
+    <!-- right end face shading -->
+    <path d="M276 25 Q292 30 294 40 Q292 50 276 55" fill="rgba(0,0,0,0.35)"/>
+
+    <!-- === KNOT / BURL bumps === -->
+    <ellipse cx="78"  cy="40" rx="6" ry="8" fill="none" stroke="#0d0603" stroke-width="2" opacity="0.7"/>
+    <ellipse cx="222" cy="40" rx="5" ry="7" fill="none" stroke="#0d0603" stroke-width="1.5" opacity="0.6"/>
+
+    <!-- === MYSTICAL CARVINGS (etched into surface) === -->
+    <text x="93"  y="44" text-anchor="middle" fill="#cc1010" font-size="10" font-family="monospace" opacity="0.7">☽</text>
+    <text x="150" y="43" text-anchor="middle" fill="#bb1515" font-size="8"  font-family="monospace" opacity="0.55">✦</text>
+    <text x="207" y="44" text-anchor="middle" fill="#cc1010" font-size="10" font-family="monospace" opacity="0.7">☾</text>
+
+    <!-- === OUTER RED GLOW BLOOM (horror neon outline) === -->
+    <path d="${body}" fill="none" stroke="rgba(255,20,0,0.5)" stroke-width="9"
+          style="mix-blend-mode:screen; filter:blur(4px)"/>
+
+    <!-- === HARD BRIGHT RED PIXEL OUTLINE (the defining reference look) === -->
+    <path d="${body}" fill="none" stroke="#ff2200" stroke-width="2.2"/>
+    <path d="${body}" fill="none" stroke="rgba(255,100,60,0.6)" stroke-width="1"/>
+  `;
+}
+
+// Inject stick content into all groups
+['stick-whole','stick-top','stick-bot'].forEach(id => {
+  document.getElementById(id).innerHTML = stickSVG();
+});
+
+// ─── Radial burst rays ────────────────────────────────────────
+(function buildRays() {
+  const svg = document.getElementById('radial-burst');
+  const n = 12;
+  for (let i = 0; i < n; i++) {
+    const a = (i / n) * Math.PI * 2;
+    const r = i % 2 === 0 ? 1.6 : 1.1;
+    const cx = Math.cos(a), cy = Math.sin(a);
+    const cx1 = Math.cos(a + 0.12) * r, cy1 = Math.sin(a + 0.12) * r;
+    const cx2 = Math.cos(a - 0.12) * r, cy2 = Math.sin(a - 0.12) * r;
+    const poly = document.createElementNS('http://www.w3.org/2000/svg','polygon');
+    poly.setAttribute('points', `${cx*0.05},${cy*0.05} ${cx1},${cy1} ${cx2},${cy2}`);
+    poly.setAttribute('fill', 'rgba(200,0,0,0.6)');
+    poly.setAttribute('style', 'mix-blend-mode:screen');
+    svg.appendChild(poly);
+  }
+  const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+  c.setAttribute('cx','0'); c.setAttribute('cy','0'); c.setAttribute('r','0.22');
+  c.setAttribute('fill','none'); c.setAttribute('stroke','rgba(255,30,30,0.3)');
+  c.setAttribute('stroke-width','0.05');
+  svg.appendChild(c);
+})();
+
+// ─── Shard splinters ───────────────────────────────────────────
+// Shards: 3 red impact triangles (like reference) + 5 wood splinters
+// type:'tri' = red impact ray; type:'wood' = dark flying splinter
+const SHARDS_DATA = [
+  // Red impact triangles — burst from break point, matches reference exactly
+  { dx:-32, dy:-48, rot:-145, w:14, h:18, type:'tri' },
+  { dx:  8, dy:-55, rot: 175, w:12, h:16, type:'tri' },
+  { dx: 28, dy:-25, rot: 130, w:10, h:14, type:'tri' },
+  // Wood splinters flying outward
+  { dx:-75, dy: 35, rot:-108, w:4,  h:17, type:'wood' },
+  { dx: 82, dy: 42, rot: 122, w:3,  h:18, type:'wood' },
+  { dx:-48, dy: 78, rot: -92, w:5,  h:12, type:'wood' },
+  { dx: 55, dy:-72, rot: 112, w:4,  h:15, type:'wood' },
+  { dx:-62, dy: 58, rot:-150, w:3,  h:16, type:'wood' },
+];
+const shardContainer = document.getElementById('shards');
+SHARDS_DATA.forEach((s, i) => {
+  const el = document.createElement('div');
+  const isTri = s.type === 'tri';
+  if (isTri) {
+    // Red impact triangle (CSS border-trick right triangle)
+    el.style.cssText = `
+      position:absolute; top:50%; left:50%;
+      width:0; height:0;
+      margin-left:0; margin-top:0;
+      border-left:${s.w/2}px solid transparent;
+      border-right:${s.w/2}px solid transparent;
+      border-bottom:${s.h}px solid #ff2200;
+      filter:drop-shadow(0 0 4px #ff0000);
+      opacity:0; pointer-events:none;
+    `;
+  } else {
+    el.style.cssText = `
+      position:absolute; top:50%; left:50%;
+      width:${s.w}px; height:${s.h}px;
+      margin-left:${-s.w/2}px; margin-top:${-s.h/2}px;
+      background:linear-gradient(160deg,#3a1a08,#1a0a02);
+      box-shadow:0 0 4px rgba(255,26,26,0.45);
+      border-radius:1px; opacity:0; pointer-events:none;
+    `;
+  }
+  el.dataset.dx = s.dx; el.dataset.dy = s.dy; el.dataset.rot = s.rot;
+  el.dataset.idx = i;
+  shardContainer.appendChild(el);
+});
+
+// ─── Phase state machine ───────────────────────────────────────
+let phase = 'idle';
+const timers = [];
+function clearTimers() { timers.forEach(clearTimeout); timers.length = 0; }
+
+function setPhase(p) {
+  phase = p;
+  document.body.className = 'phase-' + p;
+  document.getElementById('bg').className =
+    p === 'idle' ? 'bg-idle' :
+    p === 'breaking' || p === 'fading' || p === 'success' ? 'bg-dark' : 'bg-' + p;
+}
+
+function schedule(fn, ms) {
+  timers.push(setTimeout(fn, ms));
+}
+
+// ─── Particles ─────────────────────────────────────────────────
+const pContainer = document.getElementById('particles');
+let pCount = 0;
+
+function spawnParticle() {
+  const stage = document.getElementById('willow-stage');
+  const sw = stage.offsetWidth, sh = stage.offsetHeight;
+  const el = document.createElement('div');
+  const size = 1 + Math.random() * 3;
+  const x = sw / 2 + (Math.random() - 0.5) * Math.min(sw * 0.6, 120);
+  const y = sh / 2 + (Math.random() - 0.5) * Math.min(sh * 0.5, 110);
+  const dur = 2500 + Math.random() * 3000;
+  const drift = (Math.random() - 0.5) * 40;
+  el.className = 'particle';
+  el.style.cssText = `left:${x}px;top:${y}px;width:${size}px;height:${size}px;
+    --drift:${drift}px; animation-duration:${dur}ms;`;
+  pContainer.appendChild(el);
+  setTimeout(() => el.remove(), dur);
+}
+
+setInterval(() => {
+  if (phase === 'success') return;
+  const count = phase === 'idle' ? 1 : phase === 'charging' ? 2 : phase === 'shaking' ? 3 : 0;
+  for (let i = 0; i < count; i++) spawnParticle();
+}, 220);
+
+// ─── Breaking animation ────────────────────────────────────────
+function triggerBreak() {
+  // Hide whole stick
+  document.getElementById('willow-float').style.opacity = '0';
+
+  // Show left + right pieces
+  const top = document.getElementById('piece-top');  // left half
+  const bot = document.getElementById('piece-bot');  // right half
+  top.style.opacity = '1';
+  bot.style.opacity = '1';
+
+  const opts = { duration: 860, fill: 'forwards', easing: 'cubic-bezier(0.18,0,0.68,1)' };
+
+  // Left piece drops lower-left, rotating steep (matches reference)
+  top.animate([
+    { transform: 'translate(-50%,-50%) translateX(0) translateY(0) rotate(0deg)' },
+    { transform: 'translate(-50%,-50%) translateX(-105px) translateY(95px) rotate(-55deg)' }
+  ], opts);
+
+  // Right piece flies upper-right, staying flatter (matches reference)
+  bot.animate([
+    { transform: 'translate(-50%,-50%) translateX(0) translateY(0) rotate(0deg)' },
+    { transform: 'translate(-50%,-50%) translateX(125px) translateY(-50px) rotate(20deg)' }
+  ], { ...opts, delay: 14 });
+
+  // Shards — make visible for animation
+  document.querySelectorAll('#shards div').forEach((el, i) => {
+    el.style.display = 'block';  // Ensure shards are visible
+    const dx = parseFloat(el.dataset.dx) * 0.55;
+    const dy = parseFloat(el.dataset.dy) * 0.55;
+    const rot = parseFloat(el.dataset.rot);
+    el.animate([
+      { opacity: 0, transform: 'translate(0,0) rotate(0deg)' },
+      { opacity: 1, transform: `translate(${dx * 0.15}px,${dy * 0.15}px) rotate(${rot * 0.1}deg)`, offset: 0.12 },
+      { opacity: 0.8, transform: `translate(${dx}px,${dy}px) rotate(${rot}deg)` }
+    ], { duration: 1100, fill: 'forwards', easing: 'ease-out', delay: 60 + i * 28 });
+  });
+}
+
+// ─── Wish randomizer ──────────────────────────────────────────
+let wishGranted = false;
+function randomizeWish() {
+  // 50% chance of being granted - using multiple entropy sources for true randomness
+  // This prevents any potential seeding or pattern issues
+  const rand1 = Math.random();
+  const rand2 = Math.random();
+  const rand3 = Math.random();
+
+  // Use bitwise operation on combined randomness for maximum entropy
+  wishGranted = ((Math.floor(rand1 * 1000) + Math.floor(rand2 * 1000) + Math.floor(rand3 * 1000)) % 2) === 0;
+}
+
+// ─── Success message reveal ────────────────────────────────────
+function showSuccess() {
+  if (wishGranted) {
+    // Show granted message
+    const msg = document.getElementById('success-msg');
+    msg.style.opacity = '1';
+    msg.classList.add('show');
+    document.querySelectorAll('#success-msg .success-line').forEach(el => {
+      const delay = parseFloat(el.style.transitionDelay) * 1000 || 0;
+      setTimeout(() => el.classList.add('visible'), delay);
+    });
+  } else {
+    // Show denied message
+    const msg = document.getElementById('denied-msg');
+    msg.style.opacity = '1';
+    msg.classList.add('show');
+    document.querySelectorAll('#denied-msg .success-line').forEach(el => {
+      const delay = parseFloat(el.style.transitionDelay) * 1000 || 0;
+      setTimeout(() => el.classList.add('visible'), delay);
+    });
+  }
+}
+
+// ─── Grant wish sequence ───────────────────────────────────────
+function grantWish() {
+  const input = document.getElementById('wish-input');
+  if (!input.value.trim() || phase !== 'idle') return;
+  input.disabled = true;
+  document.getElementById('grant-btn').disabled = true;
+  document.getElementById('grant-btn').textContent = 'GRANTING…';
+
+  // Randomize if this wish will be granted
+  randomizeWish();
+
+  // Ensure audio engine started
+  ensureAudio();
+  startAmbient();
+
+  // Phase 1 — charging
+  setPhase('charging');
+  startCharging();
+
+  // Phase 2 — shaking (longer for anticipation)
+  schedule(() => {
+    setPhase('shaking');
+    document.getElementById('red-flash').classList.add('active');
+  }, 1200);
+
+  // Phase 3 — breaking
+  schedule(() => {
+    setPhase('breaking');
+    document.getElementById('red-flash').classList.remove('active');
+    document.getElementById('input-section').style.opacity = '0';
+    playCrack();
+    triggerBreak();
+  }, 1200 + 700);
+
+  // Phase 4 — fade
+  schedule(() => {
+    setPhase('fading');
+    document.getElementById('blackout').classList.add('active');
+  }, 1200 + 700 + 850);
+
+  // Phase 5 — success
+  schedule(() => {
+    setPhase('success');
+    showSuccess();
+  }, 1200 + 700 + 850 + 1700);
+}
+
+// ─── Reset function for "Make Another Wish" ─────────────────
+function resetWish() {
+  clearTimers();
+
+  // Reset phase
+  setPhase('idle');
+  document.getElementById('blackout').classList.remove('active');
+
+  // Restore input section (was hidden during breaking)
+  document.getElementById('input-section').style.opacity = '1';
+
+  // Reset input
+  const input = document.getElementById('wish-input');
+  input.value = '';
+  input.disabled = false;
+
+  // Reset button
+  const btn = document.getElementById('grant-btn');
+  btn.disabled = false;
+  btn.textContent = 'GRANT WISH';
+
+  // Hide success and denied messages and reset their lines
+  const msg = document.getElementById('success-msg');
+  msg.style.opacity = '0';
+  msg.classList.remove('show');
+  const deniedMsg = document.getElementById('denied-msg');
+  deniedMsg.style.opacity = '0';
+  deniedMsg.classList.remove('show');
+  document.querySelectorAll('.success-line').forEach(el => el.classList.remove('visible'));
+
+  // Reset willow pieces
+  document.getElementById('willow-float').style.opacity = '1';
+  document.getElementById('piece-top').style.opacity = '0';
+  document.getElementById('piece-bot').style.opacity = '0';
+
+  // Reset shard pieces — cancel animations and reset completely
+  const shardsContainer = document.getElementById('shards');
+  shardsContainer.querySelectorAll('div').forEach(el => {
+    // Cancel any running Web Animations
+    el.getAnimations().forEach(anim => anim.cancel());
+    // Reset to completely invisible state
+    el.style.opacity = '0';
+    el.style.transform = 'translate(0,0) rotate(0deg)';
+    el.style.display = 'none';
+  });
+
+  // Focus input for convenience
+  input.focus();
+}
+
+// ─── Event listeners ───────────────────────────────────────────
+document.getElementById('grant-btn').addEventListener('click', grantWish);
+document.getElementById('wish-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') grantWish();
+});
+document.getElementById('another-wish-btn').addEventListener('click', resetWish);
+document.getElementById('another-wish-btn-denied').addEventListener('click', resetWish);
+
+// ─── Audio engine (Web Audio API) ────────────────────────────
+let audioCtx = null;
+let masterGain = null;
+let muted = true;
+let ambientStarted = false;
+const ambientOscs = [];
+
+function ensureAudio() {
+  if (audioCtx) return;
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  masterGain = audioCtx.createGain();
+  masterGain.gain.value = 0; // muted by default
+  masterGain.connect(audioCtx.destination);
+}
+
+function startAmbient() {
+  // Ambient VHS static sound disabled per user request
+  return;
+}
+
+function startCharging() {
+  if (!audioCtx) return;
+  const now = audioCtx.currentTime;
+  const osc = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(90, now);
+  osc.frequency.exponentialRampToValueAtTime(380, now + 1.2);  // Match 1200ms charging phase
+  g.gain.setValueAtTime(0.01, now);
+  g.gain.linearRampToValueAtTime(0.07, now + 1.0);
+  g.gain.linearRampToValueAtTime(0, now + 1.3);
+  osc.connect(g); g.connect(masterGain);
+  osc.start(now); osc.stop(now + 1.3);
+}
+
+function playCrack() {
+  if (!audioCtx) return;
+  const now = audioCtx.currentTime;
+  const sr = audioCtx.sampleRate;
+  const buf = audioCtx.createBuffer(1, Math.floor(sr * 0.35), sr);
+  const data = buf.getChannelData(0);
+  for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+  const noise = audioCtx.createBufferSource();
+  noise.buffer = buf;
+  const bpf = audioCtx.createBiquadFilter();
+  bpf.type = 'bandpass'; bpf.frequency.value = 1400; bpf.Q.value = 0.6;
+  const ng = audioCtx.createGain();
+  ng.gain.setValueAtTime(0.55, now);
+  ng.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+  noise.connect(bpf); bpf.connect(ng); ng.connect(masterGain); noise.start(now);
+
+  // Sub boom
+  const boom = audioCtx.createOscillator();
+  boom.type = 'sine';
+  boom.frequency.setValueAtTime(60, now + 0.04);
+  boom.frequency.exponentialRampToValueAtTime(20, now + 0.6);
+  const bg = audioCtx.createGain();
+  bg.gain.setValueAtTime(0, now);
+  bg.gain.linearRampToValueAtTime(0.5, now + 0.05);
+  bg.gain.exponentialRampToValueAtTime(0.001, now + 0.7);
+  boom.connect(bg); bg.connect(masterGain); boom.start(now); boom.stop(now + 0.8);
+}
+
+function setMuted(m) {
+  muted = m;
+  if (!masterGain) return;
+  const now = audioCtx.currentTime;
+  masterGain.gain.cancelScheduledValues(now);
+  masterGain.gain.setTargetAtTime(m ? 0 : 1, now, 0.15);
+}
+
+document.getElementById('mute-btn').addEventListener('click', () => {
+  ensureAudio();
+  if (ambientStarted) {
+    audioCtx.resume();
+  }
+  const next = !muted;
+  setMuted(next);
+  document.getElementById('mute-btn').textContent = next ? '🔇' : '🔊';
+});
+</script>
+</body>
+</html>
