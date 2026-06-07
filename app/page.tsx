@@ -326,19 +326,19 @@ export default function Home() {
       </div>
 
       <div id="success-msg">
-        <div class="success-line" style={{ transitionDelay: '0s' }}>YOUR WISH</div>
-        <div class="success-line" style={{ transitionDelay: '0.1s' }}>HAS BEEN GRANTED</div>
-        <div class="success-line success-subtext" style={{ transitionDelay: '0.2s' }}>PLEASE WAIT 24 HOURS</div>
-        <div class="success-line success-subtext" style={{ transitionDelay: '0.3s' }}>TO SEE EFFECT</div>
-        <div class="success-line success-subtext" style={{ transitionDelay: '0.4s' }}>THE WILLOW HAS HEARD YOU.</div>
-        <button id="reset-btn" class="success-line success-subtext" style={{ transitionDelay: '0.5s', background: 'transparent', border: '2px solid var(--red)', padding: '10px 20px', cursor: 'pointer', marginTop: '20px' }}>MAKE ANOTHER WISH</button>
+        <div className="success-line" style={{ transitionDelay: '0s' }}>YOUR WISH</div>
+        <div className="success-line" style={{ transitionDelay: '0.1s' }}>HAS BEEN GRANTED</div>
+        <div className="success-line success-subtext" style={{ transitionDelay: '0.2s' }}>PLEASE WAIT 24 HOURS</div>
+        <div className="success-line success-subtext" style={{ transitionDelay: '0.3s' }}>TO SEE EFFECT</div>
+        <div className="success-line success-subtext" style={{ transitionDelay: '0.4s' }}>THE WILLOW HAS HEARD YOU.</div>
+        <button id="reset-btn" className="success-line success-subtext" style={{ transitionDelay: '0.5s', background: 'transparent', border: '2px solid var(--red)', padding: '10px 20px', cursor: 'pointer', marginTop: '20px' }}>MAKE ANOTHER WISH</button>
       </div>
 
       <div id="denied-msg">
-        <div class="success-line" style={{ transitionDelay: '0s' }}>YOUR WISH</div>
-        <div class="success-line" style={{ transitionDelay: '0.1s' }}>HAS NOT GRANTED</div>
-        <div class="success-line success-subtext" style={{ transitionDelay: '0.2s' }}>THE WILLOW DOES NOT FAVOUR YOUR WISH</div>
-        <button id="reset-btn-denied" class="success-line success-subtext" style={{ transitionDelay: '0.3s', background: 'transparent', border: '2px solid var(--red)', padding: '10px 20px', cursor: 'pointer', marginTop: '20px' }}>MAKE ANOTHER WISH</button>
+        <div className="success-line" style={{ transitionDelay: '0s' }}>YOUR WISH</div>
+        <div className="success-line" style={{ transitionDelay: '0.1s' }}>HAS NOT GRANTED</div>
+        <div className="success-line success-subtext" style={{ transitionDelay: '0.2s' }}>THE WILLOW DOES NOT FAVOUR YOUR WISH</div>
+        <button id="reset-btn-denied" className="success-line success-subtext" style={{ transitionDelay: '0.3s', background: 'transparent', border: '2px solid var(--red)', padding: '10px 20px', cursor: 'pointer', marginTop: '20px' }}>MAKE ANOTHER WISH</button>
       </div>
 
       <script
