@@ -280,38 +280,45 @@ export default function Home() {
         <div id="tagline">ONE WISH, ONE CONSEQUENCE.</div>
 
         <div id="willow-container">
-          <svg id="willow-float" viewBox="0 0 300 80" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <linearGradient id="woodGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="#3a2020" />
-                <stop offset="50%" stopColor="#2a1515" />
-                <stop offset="100%" stopColor="#1a0a0a" />
-              </linearGradient>
-              <radialGradient id="redGlowGradient" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stopColor="#ff6666" stopOpacity="0.8" />
-                <stop offset="70%" stopColor="#ff1a1a" stopOpacity="0.4" />
-                <stop offset="100%" stopColor="#ff1a1a" stopOpacity="0" />
-              </radialGradient>
-            </defs>
-
-            <g id="willow-main">
-              <ellipse cx="150" cy="40" rx="95" ry="25" fill="url(#woodGradient)" opacity="0.9" />
-              <ellipse cx="150" cy="38" rx="92" ry="22" fill="none" stroke="#8b4513" strokeWidth="1" opacity="0.4" />
-              <path d="M 60 35 Q 150 25 240 35" stroke="#654321" strokeWidth="0.5" fill="none" opacity="0.6" />
-              <circle cx="75" cy="40" r="1.5" fill="#ff6666" opacity="0.7" />
-              <circle cx="225" cy="40" r="1.5" fill="#ff6666" opacity="0.7" />
-
-              <ellipse cx="150" cy="40" rx="100" ry="28" fill="none" stroke="url(#redGlowGradient)" strokeWidth="8" />
-            </g>
-
-            <g id="piece-top" style={{ opacity: 0 }}>
-              <ellipse cx="80" cy="30" rx="50" ry="18" fill="url(#woodGradient)" opacity="0.9" />
-            </g>
-
-            <g id="piece-bottom" style={{ opacity: 0 }}>
-              <ellipse cx="220" cy="50" rx="50" ry="18" fill="url(#woodGradient)" opacity="0.9" />
-            </g>
-          </svg>
+          <div id="willow-float">
+            <svg id="willow-svg" viewBox="0 0 300 80" xmlns="http://www.w3.org/2000/svg" aria-label="The One Wish Willow">
+              <defs>
+                <linearGradient id="woodGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#2e1a0a"/>
+                  <stop offset="40%" stopColor="#3a2010"/>
+                  <stop offset="100%" stopColor="#160b04"/>
+                </linearGradient>
+                <filter id="wglow">
+                  <feGaussianBlur stdDeviation="2.5" result="b"/>
+                  <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+                </filter>
+              </defs>
+              <g id="stick-whole" filter="url(#wglow)">
+                <path d="M24 56 Q6 50 6 40 Q6 28 24 24 L276 24 Q294 24 294 40 Q294 56 276 56 Z" fill="#080402" transform="translate(3,4)"/>
+                <path d="M24 56 Q6 50 6 40 Q6 28 24 24 L276 24 Q294 24 294 40 Q294 56 276 56 Z" fill="#1c1008"/>
+                <path d="M24 26 Q150 23 276 26 L276 38 Q150 36 24 38 Z" fill="rgba(80,38,14,0.45)"/>
+                <line x1="52"  y1="26" x2="52"  y2="54" stroke="#0a0502" strokeWidth="1.5" opacity="0.7"/>
+                <line x1="85"  y1="25" x2="85"  y2="55" stroke="#0a0502" strokeWidth="1"   opacity="0.55"/>
+                <line x1="118" y1="24" x2="118" y2="56" stroke="#0d0603" strokeWidth="1.5" opacity="0.65"/>
+                <line x1="150" y1="24" x2="150" y2="56" stroke="#0a0502" strokeWidth="1"   opacity="0.5"/>
+                <line x1="182" y1="24" x2="182" y2="56" stroke="#0d0603" strokeWidth="1.5" opacity="0.65"/>
+                <line x1="215" y1="25" x2="215" y2="55" stroke="#0a0502" strokeWidth="1"   opacity="0.55"/>
+                <line x1="248" y1="26" x2="248" y2="54" stroke="#0a0502" strokeWidth="1.5" opacity="0.7"/>
+                <polyline points="10,33 18,30 14,37 20,35 16,42 22,40 17,47 23,44" fill="none" stroke="#2a1408" strokeWidth="1.8" strokeLinejoin="round" opacity="0.85"/>
+                <path d="M24 25 Q8 30 6 40 Q8 50 24 55" fill="rgba(0,0,0,0.35)"/>
+                <polyline points="290,33 282,30 286,37 280,35 284,42 278,40 283,47 277,44" fill="none" stroke="#2a1408" strokeWidth="1.8" strokeLinejoin="round" opacity="0.85"/>
+                <path d="M276 25 Q292 30 294 40 Q292 50 276 55" fill="rgba(0,0,0,0.35)"/>
+                <ellipse cx="78"  cy="40" rx="6" ry="8" fill="none" stroke="#0d0603" strokeWidth="2" opacity="0.7"/>
+                <ellipse cx="222" cy="40" rx="5" ry="7" fill="none" stroke="#0d0603" strokeWidth="1.5" opacity="0.6"/>
+                <text x="93"  y="44" textAnchor="middle" fill="#cc1010" fontSize="10" fontFamily="monospace" opacity="0.7">☽</text>
+                <text x="150" y="43" textAnchor="middle" fill="#bb1515" fontSize="8"  fontFamily="monospace" opacity="0.55">✦</text>
+                <text x="207" y="44" textAnchor="middle" fill="#cc1010" fontSize="10" fontFamily="monospace" opacity="0.7">☾</text>
+                <path d="M24 56 Q6 50 6 40 Q6 28 24 24 L276 24 Q294 24 294 40 Q294 56 276 56 Z" fill="none" stroke="rgba(255,20,0,0.5)" strokeWidth="9" style={{ mixBlendMode: 'screen', filter: 'blur(4px)' }}/>
+                <path d="M24 56 Q6 50 6 40 Q6 28 24 24 L276 24 Q294 24 294 40 Q294 56 276 56 Z" fill="none" stroke="#ff2200" strokeWidth="2.2"/>
+                <path d="M24 56 Q6 50 6 40 Q6 28 24 24 L276 24 Q294 24 294 40 Q294 56 276 56 Z" fill="none" stroke="rgba(255,100,60,0.6)" strokeWidth="1"/>
+              </g>
+            </svg>
+          </div>
         </div>
 
         <div id="input-section">
