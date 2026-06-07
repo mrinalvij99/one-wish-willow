@@ -1,27 +1,19 @@
 {
   "name": "one-wish-willow",
-  "version": "0.1.0",
+  "version": "1.0.0",
+  "description": "A cursed, interactive horror-themed web application - One Wish Willow",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "start": "python3 -m http.server 3000",
+    "dev": "python3 -m http.server 3000"
   },
-  "dependencies": {
-    "framer-motion": "^11.15.0",
-    "next": "15.3.0",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0"
-  },
-  "devDependencies": {
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "15.3.0",
-    "postcss": "^8",
-    "tailwindcss": "^3.4.1",
-    "typescript": "^5"
-  }
+  "keywords": [
+    "horror",
+    "interactive",
+    "web-app",
+    "animation",
+    "wish"
+  ],
+  "author": "Mrinal Vij",
+  "license": "MIT"
 }
