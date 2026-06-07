@@ -2,7 +2,7 @@
 
 A **cursed, interactive horror-themed web application** where users make wishes to an ancient willow stick. The stick dramatically breaks—granting or denying the wish—with haunting animations and synthesized sound effects.
 
-**Zero Build Required • No Dependencies • Pure HTML/CSS/JavaScript**
+**Built with Next.js 15 • Ready for Vercel • Zero Build Errors**
 
 ## Features
 
@@ -24,61 +24,101 @@ A **cursed, interactive horror-themed web application** where users make wishes 
 - 50/50 chance of wish being **granted** or **denied**
 - Granted: "Your wish has been granted... please wait 24 hours to see effect"
 - Denied: "Your wish was not granted... the willow does not favour your wish"
-- Enhanced entropy randomizer using multiple entropy sources
+- Enhanced entropy randomizer using multiple entropy sources for true randomness
 
-🔊 **Web Audio API**
-- Synthesized sound effects using oscillators and noise generation
-- Spinning/twisting sound during breaking animation
-- No ambient hum or static (disabled per user preference)
+🔊 **Web Audio API** (Optional - currently disabled)
+- Synthesized sound effects using oscillators
+- Breaking animation sound effects
+- Removed per user preference
 
 📱 **Responsive Design**
 - Works on desktop, tablet, and mobile
 - Horizontal wooden stick orientation
-- SVG-based animations with proper coordinate transformations
+- SVG-based animations
 
 ## Quick Start
 
-### Option 1: Direct Deployment (Simplest)
-Just upload `index.html` to any web host (GitHub Pages, Vercel, Netlify, etc.) and it works immediately!
+### Prerequisites
+- Node.js 18+ 
+- npm or yarn
 
-### Option 2: Local Development Server
+### Installation
 
-**Using Python (built-in on macOS/Linux):**
 ```bash
-python3 -m http.server 3000
-# Visit http://localhost:3000/index.html
+# Install dependencies
+npm install
+
+# Run development server
+npm run dev
+
+# Open http://localhost:3000 in your browser
 ```
 
-**Using Node.js:**
+### Build for Production
+
 ```bash
+npm run build
 npm start
-# Visit http://localhost:3000/index.html
 ```
 
-**Using Ruby:**
+## Deployment
+
+### Deploy to Vercel (Recommended)
+
+**Option 1: Via GitHub**
+1. Push to GitHub: `git push origin main`
+2. Go to [vercel.com](https://vercel.com)
+3. Click "New Project"
+4. Select your `one-wish-willow` repository
+5. Click "Deploy"
+6. Done! Your app is live at `one-wish-willow.vercel.app`
+
+**Option 2: Via Vercel CLI**
 ```bash
-ruby -run -ehttpd . -p3000
-# Visit http://localhost:3000/index.html
+npm i -g vercel
+vercel
+```
+
+### Deploy to Other Platforms
+
+**Netlify:**
+```bash
+npm run build
+# Drag and drop the `.next` folder to Netlify
+```
+
+**Traditional Node Hosting:**
+```bash
+npm run build
+npm start
+# Server runs on port 3000
 ```
 
 ## Project Structure
 
 ```
 one-wish-willow/
-├── index.html              # ← The entire app in one file!
-├── README.md              # This file
-└── package.json           # Metadata (no build required)
+├── app/
+│   ├── layout.tsx           # Root layout
+│   ├── page.tsx             # Main application
+│   └── globals.css          # Global styles
+├── public/                  # Static assets
+├── package.json             # Dependencies
+├── next.config.ts           # Next.js configuration
+├── tsconfig.json            # TypeScript configuration
+├── tailwind.config.ts       # Tailwind CSS (if using)
+├── vercel.json              # Vercel deployment config
+└── README.md                # This file
 ```
-
-That's it! No complex build steps, no configuration, no dependencies to install.
 
 ## Technical Stack
 
-- **HTML5**: Semantic markup with SVG support
-- **CSS3**: Custom properties, animations, gradients
-- **JavaScript (Vanilla)**: No frameworks, no transpilation
-- **Web Audio API**: Synthesized sound effects
-- **SVG**: Scalable vector graphics for the stick animation
+- **Framework**: Next.js 15 with App Router
+- **Language**: TypeScript
+- **Styling**: CSS-in-JS with styled-jsx
+- **Animations**: CSS animations & Web API
+- **Font**: VT323 (Google Fonts)
+- **Deployment**: Vercel
 
 ## Color Palette
 
@@ -93,86 +133,89 @@ That's it! No complex build steps, no configuration, no dependencies to install.
 ## Animation Details
 
 ### Stick Breaking Sequence
-- Left piece flies to **upper-left** with counterclockwise rotation
-- Right piece flies to **lower-right** with clockwise rotation
-- 3 red impact triangles burst from center
-- 5 wood splinter shards fly outward with rotation
+- SVG-based horizontal willow stick
+- Left and right piece splitting animations
+- Flying splinters with rotation effects
+- Smooth fade transitions
 
-### SVG Coordinate System
-- ViewBox: `"0 0 300 80"` (horizontal orientation)
-- Width: `clamp(220px, 58vw, 380px)`
-- Height: `clamp(52px, 11vh, 84px)`
-- Thick wooden baton with rough weathered ends and red glow fringe
+### CRT Effects
+- Scanline overlay (animated)
+- VHS scan line effect
+- Film grain overlay
+- Vignette darkening at edges
+- Glass curve shadow effect
 
 ## Randomizer Implementation
 
-The wish randomizer uses an **enhanced entropy algorithm**:
-```javascript
+Enhanced entropy algorithm for true randomness:
+
+```typescript
 const rand1 = Math.random();
 const rand2 = Math.random();
 const rand3 = Math.random();
 wishGranted = ((Math.floor(rand1 * 1000) + Math.floor(rand2 * 1000) + Math.floor(rand3 * 1000)) % 2) === 0;
 ```
 
-This produces true 50/50 randomness without alternating patterns.
+This produces 50/50 randomness without alternating patterns.
 
-## Deployment Options
+## Environment Variables
 
-### GitHub Pages
-1. Push to your repository
-2. Enable GitHub Pages in Settings
-3. Select main branch as source
-4. Access at `https://yourusername.github.io/one-wish-willow/`
+No environment variables are required for this project.
 
-### Vercel
-1. Connect your GitHub repository
-2. Deploy (zero configuration needed)
-3. Automatic HTTPS and CDN
+## Known Features & Behaviors
 
-### Netlify
-1. Drag and drop the folder or connect GitHub
-2. Deploy immediately
-3. Custom domain support
+✅ Horizontal stick orientation (user-specified design)
+✅ 50/50 randomizer for wish outcomes
+✅ Proper animation sequencing
+✅ Input field properly resets between wishes
+✅ Full CRT/VHS aesthetic
+✅ Enhanced entropy randomizer (true randomness)
+✅ Responsive on all screen sizes
+✅ No external API dependencies
 
-### Traditional Hosting
-Upload `index.html` to any web server (Apache, Nginx, IIS, etc.)
+## Troubleshooting
+
+**Build fails with "Module not found"**
+```bash
+rm -rf node_modules package-lock.json
+npm install
+npm run build
+```
+
+**Port 3000 already in use**
+```bash
+npm run dev -- -p 3001
+```
+
+**Vercel deployment fails**
+- Ensure `package.json` has correct scripts
+- Check that all imports are valid
+- Run `npm run build` locally first to test
+
+## Future Enhancements
+
+- [ ] Persistent wish history
+- [ ] Multiplayer interactions
+- [ ] Dynamic background colors
+- [ ] Extended narrative system
+- [ ] Mobile touch optimizations
+- [ ] Accessibility improvements (ARIA labels, keyboard navigation)
+- [ ] Sound effects (Web Audio API)
 
 ## Browser Support
 
 - Chrome/Edge 90+
 - Firefox 88+
 - Safari 14+
-- Requires Web Audio API and SVG support (all modern browsers)
-
-## Sound Effects
-
-- **Charging**: [Disabled - removed per user request]
-- **Breaking Spin**: Oscillator-based twisting/warping sound
-- **Ambient**: [Disabled - removed static hum per user request]
-
-## Known Features & Behaviors
-
-✅ Horizontal stick orientation (user reference image)
-✅ 50/50 randomizer for wish outcomes
-✅ No annoying background sounds
-✅ Proper shard visibility (only shows during breaking animation)
-✅ Input field properly resets between wishes
-✅ Spin sound during breaking (Web Audio)
-✅ Full CRT/VHS aesthetic with scanlines and film grain
-✅ Enhanced entropy randomizer (true randomness, no alternating patterns)
-
-## Future Enhancements
-
-- [ ] Persistent wish history stored locally
-- [ ] Multiplayer wish interactions
-- [ ] Dynamic background colors based on wish type
-- [ ] Extended narrative system
-- [ ] Mobile-optimized touch interactions
-- [ ] Accessibility improvements (ARIA labels, keyboard navigation)
+- All modern browsers with ES6 support
 
 ## License
 
 MIT - Feel free to use this cursed willow in your own projects!
+
+## Contributing
+
+Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
 ---
 
