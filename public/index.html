@@ -25,6 +25,10 @@ body {
   -webkit-user-select: none;
 }
 
+/* ─── Hide scanlines on result screens ───────────────────── */
+body.phase-success::before, body.phase-success::after,
+body.phase-denied::before,  body.phase-denied::after  { opacity: 0 !important; }
+
 /* ─── CRT scanlines ───────────────────────────────────────── */
 body::before {
   content: '';
