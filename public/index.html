@@ -331,6 +331,7 @@ body::after {
   /* +15% from previous size */
   width: clamp(285px, 74vw, 490px);
   height: clamp(150px, 39vw, 259px);   /* matches image aspect ratio ~1.896:1 */
+  display: none;        /* Hidden by default — display:none beats any animation fill */
   opacity: 0;
   pointer-events: none;
   background-image: url('stick breaking.png');
@@ -813,14 +814,12 @@ function setPhase(p) {
   document.getElementById('bg').className =
     p === 'idle' ? 'bg-idle' :
     p === 'breaking' || p === 'fading' || p === 'success' ? 'bg-dark' : 'bg-' + p;
-  // Hide break piece — only once blackout/result takes over, not during fading
-  // (fading = blackout overlay covers screen; piece should stay through that)
+  // Hard-hide break piece — display:none beats fill:forwards on any animation
   if (p === 'success' || p === 'denied' || p === 'idle') {
     const piece = document.getElementById('piece-top');
     piece.getAnimations().forEach(a => a.cancel());
-    piece.style.transition = 'none';
+    piece.style.display = 'none';
     piece.style.opacity = '0';
-    requestAnimationFrame(() => { piece.style.transition = ''; });
   }
 }
 
@@ -861,6 +860,7 @@ function triggerBreak() {
 
   // Show full breaking image (single element, no crop)
   const piece = document.getElementById('piece-top');
+  piece.style.display = 'block';
   piece.style.opacity = '1';
 
   const opts = { duration: 900, fill: 'forwards', easing: 'cubic-bezier(0.18,0,0.68,1)' };
@@ -999,15 +999,14 @@ function resetWish() {
   deniedMsg.classList.remove('show');
   document.querySelectorAll('.success-line').forEach(el => el.classList.remove('visible'));
 
-  // Reset willow pieces — cancel fill, kill transition, force hide
+  // Reset willow pieces — display:none guarantees invisible regardless of animation fill
   document.getElementById('willow-float').style.opacity = '1';
   ['piece-top', 'piece-bot'].forEach(id => {
     const el = document.getElementById(id);
     el.getAnimations().forEach(a => a.cancel());
-    el.style.transition = 'none';
+    el.style.display = 'none';
     el.style.opacity = '0';
     el.style.transform = 'translate(-50%, -50%)';
-    requestAnimationFrame(() => { el.style.transition = ''; });
   });
 
   // Reset shard pieces — cancel animations and reset completely
