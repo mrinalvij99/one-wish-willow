@@ -624,6 +624,49 @@ body::after {
   60%, 100% { clip-path: inset(0 0 0 0);     transform: translate(0,0); color: inherit; }
 }
 
+/* ─── Title subtle glitch (fires every ~6s) ──────────────── */
+.title-glitch { position: relative; display: inline-block; }
+.title-glitch::before, .title-glitch::after {
+  content: attr(data-text);
+  position: absolute; inset: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  opacity: 0;
+}
+.title-glitch::before {
+  color: #ff0044;
+  animation: titleGlitch1 6s ease-in-out infinite;
+}
+.title-glitch::after {
+  color: #ff5500;
+  animation: titleGlitch2 6s ease-in-out infinite 0.05s;
+}
+@keyframes titleGlitch1 {
+  0%    { clip-path: inset(55% 0 25% 0); transform: translate(-4px, 0); opacity: 0.85; }
+  2%    { clip-path: inset(20% 0 60% 0); transform: translate(3px, 0);  opacity: 0.85; }
+  4%    { clip-path: inset(70% 0 10% 0); transform: translate(-2px, 0); opacity: 0.85; }
+  6%    { clip-path: inset(35% 0 45% 0); transform: translate(2px, 0);  opacity: 0.6; }
+  8%    { clip-path: inset(0 0 0 0);     transform: translate(0, 0);    opacity: 0; }
+  100%  { clip-path: inset(0 0 0 0);     transform: translate(0, 0);    opacity: 0; }
+}
+@keyframes titleGlitch2 {
+  0%    { clip-path: inset(10% 0 65% 0); transform: translate(3px, 0);  opacity: 0.8; }
+  2.5%  { clip-path: inset(60% 0 15% 0); transform: translate(-3px, 0); opacity: 0.8; }
+  5%    { clip-path: inset(30% 0 50% 0); transform: translate(2px, 0);  opacity: 0.8; }
+  7%    { clip-path: inset(0 0 0 0);     transform: translate(0, 0);    opacity: 0.4; }
+  9%    { clip-path: inset(0 0 0 0);     transform: translate(0, 0);    opacity: 0; }
+  100%  { clip-path: inset(0 0 0 0);     transform: translate(0, 0);    opacity: 0; }
+}
+/* subtle body shift on the title itself */
+#title { animation: titleBodyGlitch 6s ease-in-out infinite; }
+@keyframes titleBodyGlitch {
+  0%   { transform: translate(0, 0); }
+  2%   { transform: translate(-1px, 0); }
+  4%   { transform: translate(1px, 0); }
+  6%   { transform: translate(0, 0); }
+  100% { transform: translate(0, 0); }
+}
+
 /* ─── Mute button ─────────────────────────────────────────── */
 #mute-btn {
   position: fixed; bottom: 1.25rem; right: 1.25rem;
@@ -662,7 +705,7 @@ body::after {
 <div id="app">
   <!-- HEADER -->
   <header id="header">
-    <h1 id="title">ONE WISH WILLOW</h1>
+    <h1 id="title"><span class="title-glitch" data-text="ONE WISH WILLOW">ONE WISH WILLOW</span></h1>
     <p id="subtitle">ONE WISH. ONE CONSEQUENCE.</p>
   </header>
 
