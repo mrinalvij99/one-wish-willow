@@ -328,9 +328,9 @@ body::after {
   position: absolute;
   top: 50%; left: 50%;
   transform: translate(-50%, -50%);
-  /* Full breaking image, 15% smaller than previous */
-  width: clamp(150px, 39vw, 258px);
-  height: clamp(79px, 21vw, 136px);   /* matches image aspect ratio ~1.896:1 */
+  /* +65% from previous size */
+  width: clamp(248px, 64vw, 426px);
+  height: clamp(130px, 34vw, 225px);   /* matches image aspect ratio ~1.896:1 */
   opacity: 0;
   pointer-events: none;
   background-image: url('stick breaking.png');
@@ -338,20 +338,27 @@ body::after {
   background-repeat: no-repeat;
   background-position: center;
   mix-blend-mode: screen;
-  /* Only top + bottom soft fade — no left/right cropping */
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 18%, black 82%, transparent 100%);
-  mask-image: linear-gradient(to bottom, transparent 0%, black 18%, black 82%, transparent 100%);
+  transition: opacity 0.5s ease-out;
+  /* 4-edge soft fade: outer left/right + top/bottom — no cut at break point */
+  -webkit-mask-image:
+    linear-gradient(to right,  transparent 0%, black 9%, black 91%, transparent 100%),
+    linear-gradient(to bottom, transparent 0%, black 12%, black 88%, transparent 100%);
+  -webkit-mask-composite: destination-in;
+  mask-image:
+    linear-gradient(to right,  transparent 0%, black 9%, black 91%, transparent 100%),
+    linear-gradient(to bottom, transparent 0%, black 12%, black 88%, transparent 100%);
+  mask-composite: intersect;
 }
-/* Soft atmospheric radial glow */
+/* Soft atmospheric radial glow — kept well inside edges so it never reaches boundary */
 .break-piece::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse 90% 80% at center,
-    rgba(255,52,0,0.42) 0%,
-    rgba(210,8,0,0.20) 48%,
-    rgba(160,0,0,0.07) 68%,
-    transparent 82%);
+  background: radial-gradient(ellipse 65% 58% at center,
+    rgba(255,52,0,0.40) 0%,
+    rgba(210,8,0,0.18) 45%,
+    rgba(160,0,0,0.05) 65%,
+    transparent 78%);
   pointer-events: none;
 }
 /* Only #piece-top is used — shows full image, #piece-bot stays hidden */
@@ -806,6 +813,11 @@ function setPhase(p) {
   document.getElementById('bg').className =
     p === 'idle' ? 'bg-idle' :
     p === 'breaking' || p === 'fading' || p === 'success' ? 'bg-dark' : 'bg-' + p;
+  // Fade out break piece when leaving breaking phase
+  if (p === 'fading' || p === 'success' || p === 'denied') {
+    const piece = document.getElementById('piece-top');
+    piece.style.opacity = '0';
+  }
 }
 
 function schedule(fn, ms) {
