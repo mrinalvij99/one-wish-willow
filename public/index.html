@@ -333,20 +333,43 @@ body::after {
   opacity: 0;
   pointer-events: none;
 }
+/* Smooth atmospheric glow behind each piece */
+.break-piece::before {
+  content: '';
+  position: absolute;
+  inset: -55%;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(ellipse 80% 65% at center,
+    rgba(255,50,0,0.38) 0%,
+    rgba(210,10,0,0.18) 40%,
+    rgba(160,0,0,0.06) 62%,
+    transparent 75%);
+  z-index: 0;
+}
 .break-piece img {
+  position: relative;
+  z-index: 1;
   width: 100%;
   height: 100%;
   object-fit: contain;
   display: block;
   mix-blend-mode: screen;
-  filter: drop-shadow(0 0 18px rgba(255,50,0,0.65))
-          drop-shadow(0 0 36px rgba(200,0,0,0.45))
-          drop-shadow(0 0 6px rgba(255,80,30,0.4));
+  /* Soft wide glow — no hard edges */
+  filter: drop-shadow(0 0 22px rgba(255,65,0,0.5))
+          drop-shadow(0 0 55px rgba(215,0,0,0.28))
+          drop-shadow(0 0 100px rgba(180,0,0,0.12));
 }
-/* Left piece: clip to left half of breaking image */
-#piece-top img { clip-path: inset(0 50% 0 0); }
-/* Right piece: clip to right half of breaking image */
-#piece-bot img { clip-path: inset(0 0 0 50%); }
+/* Left piece: soft gradient fade at the cut line (right side) */
+#piece-top img {
+  -webkit-mask-image: linear-gradient(to right, black 18%, black 40%, transparent 56%);
+  mask-image: linear-gradient(to right, black 18%, black 40%, transparent 56%);
+}
+/* Right piece: soft gradient fade at the cut line (left side) */
+#piece-bot img {
+  -webkit-mask-image: linear-gradient(to right, transparent 44%, black 60%, black 82%);
+  mask-image: linear-gradient(to right, transparent 44%, black 60%, black 82%);
+}
 
 /* ─── Input section ───────────────────────────────────────── */
 #input-section {
@@ -846,16 +869,16 @@ function triggerBreak() {
 
   const opts = { duration: 860, fill: 'forwards', easing: 'cubic-bezier(0.18,0,0.68,1)' };
 
-  // Left piece drops lower-left, rotating steep (matches reference)
+  // Left piece drops lower-left, rotating steep
   top.animate([
     { transform: 'translate(-50%,-50%) translateX(0) translateY(0) rotate(0deg)' },
-    { transform: 'translate(-50%,-50%) translateX(-105px) translateY(95px) rotate(-55deg)' }
+    { transform: 'translate(-50%,-50%) translateX(-62px) translateY(56px) rotate(-34deg)' }
   ], opts);
 
-  // Right piece flies upper-right, staying flatter (matches reference)
+  // Right piece flies upper-right, staying flatter
   bot.animate([
     { transform: 'translate(-50%,-50%) translateX(0) translateY(0) rotate(0deg)' },
-    { transform: 'translate(-50%,-50%) translateX(125px) translateY(-50px) rotate(20deg)' }
+    { transform: 'translate(-50%,-50%) translateX(76px) translateY(-30px) rotate(13deg)' }
   ], { ...opts, delay: 14 });
 
   // Shards — make visible for animation
