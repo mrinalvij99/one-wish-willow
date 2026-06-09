@@ -474,6 +474,55 @@ body::after {
 }
 
 /* ─── Success message ─────────────────────────────────────── */
+/* ─── Money rain (easter egg) ─────────────────────────────── */
+#bills-canvas {
+  position: fixed; inset: 0;
+  z-index: 7500;
+  pointer-events: none;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.bill {
+  position: absolute;
+  top: 0;
+  border-radius: 3px;
+  background: linear-gradient(145deg, #cc1a1a 0%, #ff4444 40%, #dd2222 70%, #bb1111 100%);
+  box-shadow:
+    0 0 10px rgba(255,50,50,1),
+    0 0 22px rgba(255,0,0,0.7),
+    0 0 45px rgba(255,0,0,0.4),
+    inset 0 0 6px rgba(255,100,100,0.15);
+  border: 1px solid rgba(255,68,68,0.4);
+  animation-name: billFall;
+  animation-timing-function: ease-in;
+  animation-fill-mode: both;
+  animation-duration: var(--dur);
+  animation-delay: var(--delay);
+}
+/* inner detail lines to suggest banknote engraving */
+.bill::before {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border: 1px solid rgba(255,80,80,0.18);
+  border-radius: 1px;
+}
+.bill::after {
+  content: '';
+  position: absolute;
+  left: 20%; right: 20%;
+  top: 30%; bottom: 30%;
+  background: rgba(255,60,60,0.08);
+  border-radius: 1px;
+}
+@keyframes billFall {
+  0%   { transform: translateY(-80px) translateX(0)            rotate(var(--rot));     opacity: 0; }
+  6%   { opacity: 1; }
+  88%  { opacity: 1; }
+  100% { transform: translateY(110vh)  translateX(var(--drift)) rotate(var(--rot-end)); opacity: 0.5; }
+}
+
 #success-msg {
   position: fixed; inset: 0;
   display: flex; flex-direction: column;
@@ -699,6 +748,7 @@ body::after {
 <div id="film-grain"></div>
 <!-- Overlay effects -->
 <div id="blackout"></div>
+<div id="bills-canvas"></div>
 <div id="red-flash"></div>
 
 <!-- Main app -->
@@ -972,6 +1022,45 @@ function randomizeWish() {
   wishGranted = Math.random() < 0.5;
 }
 
+// ─── Money rain easter egg ─────────────────────────────────────
+function launchBills() {
+  const canvas = document.getElementById('bills-canvas');
+  canvas.innerHTML = '';
+  canvas.style.opacity = '1';
+
+  const count = 100 + Math.floor(Math.random() * 21); // 100–120
+  for (let i = 0; i < count; i++) {
+    const bill = document.createElement('div');
+    bill.className = 'bill';
+
+    const w    = 52 + Math.random() * 28;          // 52–80px wide
+    const h    = w  * 0.42;                        // ~banknote proportion
+    const left = -6 + Math.random() * 112;         // slight overhang both sides
+    const rot  = -22 + Math.random() * 44;         // initial tilt
+    const spin = -35 + Math.random() * 70;         // extra rotation during fall
+    const drift= -50 + Math.random() * 100;        // sideways drift px
+    const dur  = 1100 + Math.random() * 900;       // 1.1s–2.0s fall
+    const delay=  Math.random() * 550;             // stagger up to 0.55s
+
+    bill.style.width  = `${w}px`;
+    bill.style.height = `${h}px`;
+    bill.style.left   = `${left}%`;
+    bill.style.setProperty('--rot',     `${rot}deg`);
+    bill.style.setProperty('--rot-end', `${rot + spin}deg`);
+    bill.style.setProperty('--drift',   `${drift}px`);
+    bill.style.setProperty('--dur',     `${dur}ms`);
+    bill.style.setProperty('--delay',   `${delay}ms`);
+
+    canvas.appendChild(bill);
+  }
+
+  // Fade out the canvas just before 2 s
+  setTimeout(() => {
+    canvas.style.opacity = '0';
+    setTimeout(() => { canvas.innerHTML = ''; }, 600);
+  }, 1800);
+}
+
 // ─── Success message reveal ────────────────────────────────────
 function showSuccess() {
   if (wishGranted) {
@@ -999,12 +1088,17 @@ function showSuccess() {
 function grantWish() {
   const input = document.getElementById('wish-input');
   if (!input.value.trim() || phase !== 'idle') return;
+
+  // Easter egg: "a billion dollars" always grants + triggers money rain
+  const isBillions = input.value.trim().toLowerCase() === 'a billion dollars';
+
   input.disabled = true;
   document.getElementById('grant-btn').disabled = true;
   document.getElementById('grant-btn').textContent = 'GRANTING…';
 
-  // Randomize if this wish will be granted
+  // Randomize — then override if easter egg
   randomizeWish();
+  if (isBillions) wishGranted = true;
 
   // Ensure audio engine started
   ensureAudio();
@@ -1035,11 +1129,26 @@ function grantWish() {
     document.getElementById('blackout').classList.add('active');
   }, 1200 + 700 + 850 + 1000);
 
-  // Phase 5 — success
-  schedule(() => {
-    setPhase('success');
-    showSuccess();
-  }, 1200 + 700 + 850 + 1000 + 1700);
+  const T_BLACKOUT = 1200 + 700 + 850 + 1000 + 1700; // when screen is fully black
+
+  if (isBillions) {
+    // Phase 4b — money rain (2 s interlude while screen is black)
+    schedule(() => {
+      launchBills();
+    }, T_BLACKOUT);
+
+    // Phase 5 — success after bills finish + brief fade
+    schedule(() => {
+      setPhase('success');
+      showSuccess();
+    }, T_BLACKOUT + 2300);
+  } else {
+    // Phase 5 — success (normal path)
+    schedule(() => {
+      setPhase('success');
+      showSuccess();
+    }, T_BLACKOUT);
+  }
 }
 
 // ─── Reset function for "Make Another Wish" ─────────────────
@@ -1049,6 +1158,11 @@ function resetWish() {
   // Reset phase
   setPhase('idle');
   document.getElementById('blackout').classList.remove('active');
+
+  // Clear any lingering money rain
+  const billsCanvas = document.getElementById('bills-canvas');
+  billsCanvas.style.opacity = '0';
+  billsCanvas.innerHTML = '';
 
   // Restore input section (was hidden during breaking)
   document.getElementById('input-section').style.opacity = '1';
