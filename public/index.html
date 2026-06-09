@@ -328,18 +328,21 @@ body::after {
   position: absolute;
   top: 50%; left: 50%;
   transform: translate(-50%, -50%);
-  /* 20% smaller than original stick width */
-  width: clamp(176px, 46vw, 304px);
-  height: clamp(144px, 34vh, 264px);
+  /* Full breaking image, 15% smaller than previous */
+  width: clamp(150px, 39vw, 258px);
+  height: clamp(79px, 21vw, 136px);   /* matches image aspect ratio ~1.896:1 */
   opacity: 0;
   pointer-events: none;
-  /* background-image approach: full image at 2× width so each half fills container */
   background-image: url('stick breaking.png');
-  background-size: 200% auto;
+  background-size: contain;
   background-repeat: no-repeat;
+  background-position: center;
   mix-blend-mode: screen;
+  /* Only top + bottom soft fade — no left/right cropping */
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 18%, black 82%, transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0%, black 18%, black 82%, transparent 100%);
 }
-/* Soft atmospheric radial glow — stays inside element so it fades with the mask */
+/* Soft atmospheric radial glow */
 .break-piece::before {
   content: '';
   position: absolute;
@@ -351,30 +354,8 @@ body::after {
     transparent 82%);
   pointer-events: none;
 }
-/* Left piece: left half of breaking image, fade right + top + bottom */
-#piece-top {
-  background-position: 0% center;
-  -webkit-mask-image:
-    linear-gradient(to right, black 22%, black 46%, transparent 62%),
-    linear-gradient(to bottom, transparent 0%, black 18%, black 82%, transparent 100%);
-  mask-image:
-    linear-gradient(to right, black 22%, black 46%, transparent 62%),
-    linear-gradient(to bottom, transparent 0%, black 18%, black 82%, transparent 100%);
-  -webkit-mask-composite: destination-in;
-  mask-composite: intersect;
-}
-/* Right piece: right half of breaking image, fade left + top + bottom */
-#piece-bot {
-  background-position: 100% center;
-  -webkit-mask-image:
-    linear-gradient(to right, transparent 38%, black 54%, black 78%),
-    linear-gradient(to bottom, transparent 0%, black 18%, black 82%, transparent 100%);
-  mask-image:
-    linear-gradient(to right, transparent 38%, black 54%, black 78%),
-    linear-gradient(to bottom, transparent 0%, black 18%, black 82%, transparent 100%);
-  -webkit-mask-composite: destination-in;
-  mask-composite: intersect;
-}
+/* Only #piece-top is used — shows full image, #piece-bot stays hidden */
+#piece-bot { display: none; }
 
 /* ─── Input section ───────────────────────────────────────── */
 #input-section {
@@ -862,25 +843,18 @@ function triggerBreak() {
   // Hide whole stick
   document.getElementById('willow-float').style.opacity = '0';
 
-  // Show left + right pieces
-  const top = document.getElementById('piece-top');  // left half
-  const bot = document.getElementById('piece-bot');  // right half
-  top.style.opacity = '1';
-  bot.style.opacity = '1';
+  // Show full breaking image (single element, no crop)
+  const piece = document.getElementById('piece-top');
+  piece.style.opacity = '1';
 
-  const opts = { duration: 860, fill: 'forwards', easing: 'cubic-bezier(0.18,0,0.68,1)' };
+  const opts = { duration: 900, fill: 'forwards', easing: 'cubic-bezier(0.18,0,0.68,1)' };
 
-  // Left piece drops lower-left
-  top.animate([
-    { transform: 'translate(-50%,-50%) translateX(0) translateY(0) rotate(0deg)' },
-    { transform: 'translate(-50%,-50%) translateX(-65px) translateY(57px) rotate(-35deg)' }
+  // Impact pulse: snap in, slight push-out, settle
+  piece.animate([
+    { transform: 'translate(-50%,-50%) scale(0.88)', opacity: 0 },
+    { transform: 'translate(-50%,-50%) scale(1.07)', opacity: 1, offset: 0.18 },
+    { transform: 'translate(-50%,-50%) scale(1)',    opacity: 0.92 }
   ], opts);
-
-  // Right piece flies upper-right
-  bot.animate([
-    { transform: 'translate(-50%,-50%) translateX(0) translateY(0) rotate(0deg)' },
-    { transform: 'translate(-50%,-50%) translateX(80px) translateY(-30px) rotate(17deg)' }
-  ], { ...opts, delay: 14 });
 
   // Shards — make visible for animation
   document.querySelectorAll('#shards div').forEach((el, i) => {
