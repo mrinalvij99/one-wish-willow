@@ -274,17 +274,22 @@ body::after {
 }
 #willow-svg {
   width: clamp(220px, 58vw, 380px);
-  height: clamp(52px, 11vh, 84px);
+  height: auto;
   display: block;
-  overflow: visible;
-  filter: drop-shadow(0 0 18px rgba(255,50,0,0.45)) drop-shadow(0 0 36px rgba(200,0,0,0.28));
+  filter: drop-shadow(0 0 22px rgba(255,50,0,0.55))
+          drop-shadow(0 0 44px rgba(200,0,0,0.35))
+          drop-shadow(0 0 8px rgba(255,80,30,0.3));
   transition: filter 0.6s;
 }
 .phase-charging #willow-svg {
-  filter: drop-shadow(0 0 28px rgba(255,60,0,0.72)) drop-shadow(0 0 55px rgba(200,0,0,0.45));
+  filter: drop-shadow(0 0 32px rgba(255,60,0,0.82))
+          drop-shadow(0 0 60px rgba(220,0,0,0.55))
+          drop-shadow(0 0 12px rgba(255,100,40,0.5));
 }
 .phase-shaking #willow-svg {
-  filter: drop-shadow(0 0 42px rgba(255,80,0,0.9)) drop-shadow(0 0 80px rgba(255,0,0,0.6));
+  filter: drop-shadow(0 0 48px rgba(255,80,0,1))
+          drop-shadow(0 0 90px rgba(255,0,0,0.75))
+          drop-shadow(0 0 18px rgba(255,120,60,0.7));
 }
 
 @keyframes willowFloat {
@@ -318,20 +323,30 @@ body::after {
   100% { transform: translate(0,    0); }
 }
 
-/* Broken pieces — positioned over willow */
-.shard-piece {
+/* Broken pieces — PNG-based, positioned over willow */
+.break-piece {
   position: absolute;
   top: 50%; left: 50%;
   transform: translate(-50%, -50%);
-  width: clamp(220px, 58vw, 380px);
-  height: clamp(52px, 11vh, 84px);
-  overflow: visible;
+  width: clamp(300px, 72vw, 520px);
+  height: clamp(80px, 19vh, 140px);
   opacity: 0;
+  pointer-events: none;
 }
-.shard-piece svg {
-  width: 100%; height: 100%;
-  overflow: visible;
+.break-piece img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  mix-blend-mode: screen;
+  filter: drop-shadow(0 0 18px rgba(255,50,0,0.65))
+          drop-shadow(0 0 36px rgba(200,0,0,0.45))
+          drop-shadow(0 0 6px rgba(255,80,30,0.4));
 }
+/* Left piece: clip to left half of breaking image */
+#piece-top img { clip-path: inset(0 50% 0 0); }
+/* Right piece: clip to right half of breaking image */
+#piece-bot img { clip-path: inset(0 0 0 50%); }
 
 /* ─── Input section ───────────────────────────────────────── */
 #input-section {
@@ -622,54 +637,18 @@ body::after {
     <div id="willow-container">
       <div id="willow-float">
         <div id="willow-rotate">
-          <svg id="willow-svg" viewBox="0 0 300 80" aria-label="The One Wish Willow">
-            <defs>
-              <linearGradient id="woodGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%"   stop-color="#2e1a0a"/>
-                <stop offset="40%"  stop-color="#3a2010"/>
-                <stop offset="100%" stop-color="#160b04"/>
-              </linearGradient>
-              <filter id="wglow">
-                <feGaussianBlur stdDeviation="2.5" result="b"/>
-                <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-              </filter>
-            </defs>
-            <g id="stick-whole" filter="url(#wglow)"></g>
-          </svg>
+          <img id="willow-svg" src="stick.png" alt="The One Wish Willow" draggable="false">
         </div>
       </div>
 
-      <!-- Broken pieces (hidden until breaking) -->
-      <!-- LEFT half — jagged break edge -->
-      <div class="shard-piece" id="piece-top">
-        <svg viewBox="0 0 300 80" style="overflow:visible;">
-          <defs>
-            <clipPath id="clip-top">
-              <path d="M 0,0 L 145,0 L 155,8 L 145,16 L 155,24 L 145,32 L 155,40 L 145,48 L 155,56 L 145,64 L 155,72 L 150,80 L 0,80 Z"/>
-            </clipPath>
-            <filter id="wglow-t">
-              <feGaussianBlur stdDeviation="2" result="b"/>
-              <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-            </filter>
-          </defs>
-          <g id="stick-top" clip-path="url(#clip-top)" filter="url(#wglow-t)"></g>
-        </svg>
+      <!-- Broken pieces (hidden until breaking) — using PNG with screen blend -->
+      <div class="break-piece" id="piece-top">
+        <img src="stick breaking.png" alt="" draggable="false">
       </div>
-      <!-- RIGHT half — jagged break edge (mirror) -->
-      <div class="shard-piece" id="piece-bot">
-        <svg viewBox="0 0 300 80" style="overflow:visible;">
-          <defs>
-            <clipPath id="clip-bot">
-              <path d="M 150,0 L 155,8 L 145,16 L 155,24 L 145,32 L 155,40 L 145,48 L 155,56 L 145,64 L 155,72 L 150,80 L 300,80 L 300,0 Z"/>
-            </clipPath>
-            <filter id="wglow-b">
-              <feGaussianBlur stdDeviation="2" result="b"/>
-              <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-            </filter>
-          </defs>
-          <g id="stick-bot" clip-path="url(#clip-bot)" filter="url(#wglow-b)"></g>
-        </svg>
+      <div class="break-piece" id="piece-bot">
+        <img src="stick breaking.png" alt="" draggable="false">
       </div>
+
       <!-- Shard splinters -->
       <div id="shards"></div>
     </div>
@@ -710,65 +689,36 @@ body::after {
 
 <script>
 "use strict";
-// ─── Willow SVG paths (horizontal baton, viewBox 0 0 300 80) ─────
-// Reference: thick diagonal dark stick with hard bright-red pixel outline,
-//            rough/splintered ends, dark charcoal body, vertical grain.
-function stickSVG() {
-  // Body outline path — stadium/capsule shape, thick proportions
-  const body = "M24 56 Q6 50 6 40 Q6 28 24 24 L276 24 Q294 24 294 40 Q294 56 276 56 Z";
-  return `
-    <!-- === DROP SHADOW for depth === -->
-    <path d="${body}" fill="#080402" transform="translate(3,4)"/>
-
-    <!-- === MAIN DARK BODY (charcoal, like reference) === -->
-    <path d="${body}" fill="#1c1008"/>
-
-    <!-- === SUBTLE GRADIENT SURFACE SHADING === -->
-    <path d="M24 26 Q150 23 276 26 L276 38 Q150 36 24 38 Z" fill="rgba(80,38,14,0.45)"/>
-
-    <!-- === WOOD GRAIN TEXTURE — vertical lines === -->
-    <line x1="52"  y1="26" x2="52"  y2="54" stroke="#0a0502" stroke-width="1.5" opacity="0.7"/>
-    <line x1="85"  y1="25" x2="85"  y2="55" stroke="#0a0502" stroke-width="1"   opacity="0.55"/>
-    <line x1="118" y1="24" x2="118" y2="56" stroke="#0d0603" stroke-width="1.5" opacity="0.65"/>
-    <line x1="150" y1="24" x2="150" y2="56" stroke="#0a0502" stroke-width="1"   opacity="0.5"/>
-    <line x1="182" y1="24" x2="182" y2="56" stroke="#0d0603" stroke-width="1.5" opacity="0.65"/>
-    <line x1="215" y1="25" x2="215" y2="55" stroke="#0a0502" stroke-width="1"   opacity="0.55"/>
-    <line x1="248" y1="26" x2="248" y2="54" stroke="#0a0502" stroke-width="1.5" opacity="0.7"/>
-
-    <!-- === LEFT ROUGH END — jagged splinter fraying === -->
-    <polyline points="10,33 18,30 14,37 20,35 16,42 22,40 17,47 23,44"
-              fill="none" stroke="#2a1408" stroke-width="1.8" stroke-linejoin="round" opacity="0.85"/>
-    <!-- left end face shading -->
-    <path d="M24 25 Q8 30 6 40 Q8 50 24 55" fill="rgba(0,0,0,0.35)"/>
-
-    <!-- === RIGHT ROUGH END — jagged splinter fraying === -->
-    <polyline points="290,33 282,30 286,37 280,35 284,42 278,40 283,47 277,44"
-              fill="none" stroke="#2a1408" stroke-width="1.8" stroke-linejoin="round" opacity="0.85"/>
-    <!-- right end face shading -->
-    <path d="M276 25 Q292 30 294 40 Q292 50 276 55" fill="rgba(0,0,0,0.35)"/>
-
-    <!-- === KNOT / BURL bumps === -->
-    <ellipse cx="78"  cy="40" rx="6" ry="8" fill="none" stroke="#0d0603" stroke-width="2" opacity="0.7"/>
-    <ellipse cx="222" cy="40" rx="5" ry="7" fill="none" stroke="#0d0603" stroke-width="1.5" opacity="0.6"/>
-
-    <!-- === MYSTICAL CARVINGS (etched into surface) === -->
-    <text x="93"  y="44" text-anchor="middle" fill="#cc1010" font-size="10" font-family="monospace" opacity="0.7">☽</text>
-    <text x="150" y="43" text-anchor="middle" fill="#bb1515" font-size="8"  font-family="monospace" opacity="0.55">✦</text>
-    <text x="207" y="44" text-anchor="middle" fill="#cc1010" font-size="10" font-family="monospace" opacity="0.7">☾</text>
-
-    <!-- === OUTER RED GLOW BLOOM (horror neon outline) === -->
-    <path d="${body}" fill="none" stroke="rgba(255,20,0,0.5)" stroke-width="9"
-          style="mix-blend-mode:screen; filter:blur(4px)"/>
-
-    <!-- === HARD BRIGHT RED PIXEL OUTLINE (the defining reference look) === -->
-    <path d="${body}" fill="none" stroke="#ff2200" stroke-width="2.2"/>
-    <path d="${body}" fill="none" stroke="rgba(255,100,60,0.6)" stroke-width="1"/>
-  `;
+// ─── PNG image processing — remove white background from stick.png ──────────
+// Canvas-based approach: removes white/near-white pixels, preserves wood colors
+function removeWhiteBg(src, callback) {
+  const canvas = document.createElement('canvas');
+  const ctx    = canvas.getContext('2d');
+  const img    = new Image();
+  img.onload = function () {
+    canvas.width  = img.width;
+    canvas.height = img.height;
+    ctx.drawImage(img, 0, 0);
+    const data = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const px   = data.data;
+    for (let i = 0; i < px.length; i += 4) {
+      const r = px[i], g = px[i + 1], b = px[i + 2];
+      // Near-white detection: all channels high and similar
+      const minC = Math.min(r, g, b);
+      if (minC > 195) {
+        // Smooth edge: alpha falls off as whiteness increases 195→255
+        px[i + 3] = Math.max(0, Math.round(255 * (1 - (minC - 195) / 60)));
+      }
+    }
+    ctx.putImageData(data, 0, 0);
+    callback(canvas.toDataURL('image/png'));
+  };
+  img.src = src;
 }
 
-// Inject stick content into all groups
-['stick-whole','stick-top','stick-bot'].forEach(id => {
-  document.getElementById(id).innerHTML = stickSVG();
+// Process stick.png on load — swap src when ready
+removeWhiteBg('stick.png', function (url) {
+  document.getElementById('willow-svg').src = url;
 });
 
 // ─── Radial burst rays ────────────────────────────────────────
@@ -1037,8 +987,12 @@ function resetWish() {
 
   // Reset willow pieces
   document.getElementById('willow-float').style.opacity = '1';
-  document.getElementById('piece-top').style.opacity = '0';
-  document.getElementById('piece-bot').style.opacity = '0';
+  ['piece-top', 'piece-bot'].forEach(id => {
+    const el = document.getElementById(id);
+    el.getAnimations().forEach(a => a.cancel());
+    el.style.opacity = '0';
+    el.style.transform = 'translate(-50%, -50%)';
+  });
 
   // Reset shard pieces — cancel animations and reset completely
   const shardsContainer = document.getElementById('shards');
