@@ -734,6 +734,14 @@ removeWhiteBg('stick.png', function (url) {
   document.getElementById('willow-svg').src = url;
 });
 
+// Preload stick breaking.png immediately so first-wish animation is instant
+// (browser only fetches background-image when element becomes visible,
+//  causing a delay on the very first break — this forces it into cache now)
+(function() {
+  const img = new Image();
+  img.src = 'stick breaking.png';
+})();
+
 // ─── Radial burst rays ────────────────────────────────────────
 (function buildRays() {
   const svg = document.getElementById('radial-burst');
