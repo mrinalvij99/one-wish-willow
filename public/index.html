@@ -509,17 +509,11 @@ body::after {
 .success-mid {
   font-family: 'Roboto', sans-serif;
   font-weight: 500;
-  font-size: clamp(1.17rem, 3.39vw, 1.9rem);
+  font-size: clamp(0.97rem, 2.81vw, 1.58rem);
   letter-spacing: 0.08em;
-  white-space: nowrap;
   opacity: 0.8;
   margin-top: 0.3rem;
-  text-shadow:
-    0 0 2px rgba(255,255,255,0.85),
-    0 0 5px rgba(255,200,200,0.6),
-    0 0 8px rgba(255,50,50,0.9),
-    0 0 20px rgba(255,0,0,0.6),
-    0 0 40px rgba(255,0,0,0.3);
+  text-shadow: 0 0 8px rgba(255,50,50,0.50), 0 0 20px rgba(255,0,0,0.25);
 }
 .success-sep {
   font-size: clamp(0.85rem, 2vw, 1.1rem);
@@ -530,16 +524,11 @@ body::after {
 .success-small {
   font-family: 'Roboto', sans-serif;
   font-weight: 500;
-  font-size: clamp(0.9rem, 2.33vw, 1.17rem);
+  font-size: clamp(0.75rem, 1.93vw, 0.97rem);
   letter-spacing: 0.12em;
   white-space: nowrap;
   opacity: 0.55;
-  text-shadow:
-    0 0 2px rgba(255,255,255,0.85),
-    0 0 5px rgba(255,200,200,0.6),
-    0 0 8px rgba(255,50,50,0.9),
-    0 0 20px rgba(255,0,0,0.6),
-    0 0 40px rgba(255,0,0,0.3);
+  text-shadow: 0 0 8px rgba(255,50,50,0.50), 0 0 20px rgba(255,0,0,0.25);
 }
 
 /* ─── Make Another Wish button ─────────────────────────────── */
@@ -718,8 +707,7 @@ body::after {
   <div class="success-line success-big"><span class="glitch" data-text="YOUR WISH">YOUR WISH</span></div>
   <div class="success-line success-big" style="transition-delay:0.9s"><span class="glitch" data-text="HAS BEEN GRANTED">HAS BEEN GRANTED</span></div>
   <div class="success-line success-sep" style="transition-delay:1.8s">─────────────────────</div>
-  <div class="success-line success-mid" style="transition-delay:2.7s">Please wait 24 hours</div>
-  <div class="success-line success-mid" style="transition-delay:3.3s">to see effect</div>
+  <div class="success-line success-mid" style="transition-delay:2.7s">Please wait 24 hours to see effect</div>
   <div class="success-line success-sep" style="transition-delay:4.0s">─────────────────────</div>
   <div class="success-line success-small" style="transition-delay:4.8s">The willow has heard you.</div>
   <button id="another-wish-btn" style="transition-delay:0.2s" class="success-line">MAKE ANOTHER WISH</button>
@@ -730,7 +718,7 @@ body::after {
   <div class="success-line success-big"><span class="glitch" data-text="YOUR WISH">YOUR WISH</span></div>
   <div class="success-line success-big" style="transition-delay:0.9s"><span class="glitch" data-text="WAS NOT GRANTED">WAS NOT GRANTED</span></div>
   <div class="success-line success-sep" style="transition-delay:1.8s">─────────────────────</div>
-  <div class="success-line success-small" style="transition-delay:2.7s">The willow does not favour your wish</div>
+  <div class="success-line success-mid" style="transition-delay:2.7s">The willow does not favour your wish</div>
   <div class="success-line success-sep" style="transition-delay:3.5s">─────────────────────</div>
   <button id="another-wish-btn-denied" style="transition-delay:0.2s" class="success-line">MAKE ANOTHER WISH</button>
 </div>
