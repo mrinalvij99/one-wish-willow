@@ -813,10 +813,14 @@ function setPhase(p) {
   document.getElementById('bg').className =
     p === 'idle' ? 'bg-idle' :
     p === 'breaking' || p === 'fading' || p === 'success' ? 'bg-dark' : 'bg-' + p;
-  // Fade out break piece when leaving breaking phase
-  if (p === 'fading' || p === 'success' || p === 'denied') {
+  // Hide break piece — cancel animation fill first so it can't override the style
+  if (p === 'fading' || p === 'success' || p === 'denied' || p === 'idle') {
     const piece = document.getElementById('piece-top');
+    piece.getAnimations().forEach(a => a.cancel());
+    piece.style.transition = 'none';
     piece.style.opacity = '0';
+    // Re-enable transition on next frame so future fades still work
+    requestAnimationFrame(() => { piece.style.transition = ''; });
   }
 }
 
@@ -995,13 +999,15 @@ function resetWish() {
   deniedMsg.classList.remove('show');
   document.querySelectorAll('.success-line').forEach(el => el.classList.remove('visible'));
 
-  // Reset willow pieces
+  // Reset willow pieces — cancel fill, kill transition, force hide
   document.getElementById('willow-float').style.opacity = '1';
   ['piece-top', 'piece-bot'].forEach(id => {
     const el = document.getElementById(id);
     el.getAnimations().forEach(a => a.cancel());
+    el.style.transition = 'none';
     el.style.opacity = '0';
     el.style.transform = 'translate(-50%, -50%)';
+    requestAnimationFrame(() => { el.style.transition = ''; });
   });
 
   // Reset shard pieces — cancel animations and reset completely
