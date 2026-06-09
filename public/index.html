@@ -956,17 +956,17 @@ function grantWish() {
     triggerBreak();
   }, 1200 + 700);
 
-  // Phase 4 — fade
+  // Phase 4 — fade (delayed 1s extra so break animation lingers)
   schedule(() => {
     setPhase('fading');
     document.getElementById('blackout').classList.add('active');
-  }, 1200 + 700 + 850);
+  }, 1200 + 700 + 850 + 1000);
 
   // Phase 5 — success
   schedule(() => {
     setPhase('success');
     showSuccess();
-  }, 1200 + 700 + 850 + 1700);
+  }, 1200 + 700 + 850 + 1000 + 1700);
 }
 
 // ─── Reset function for "Make Another Wish" ─────────────────
