@@ -328,9 +328,9 @@ body::after {
   position: absolute;
   top: 50%; left: 50%;
   transform: translate(-50%, -50%);
-  /* Match original stick width so each half piece appears at same visual scale */
-  width: clamp(220px, 58vw, 380px);
-  height: clamp(180px, 42vh, 330px);
+  /* 20% smaller than original stick width */
+  width: clamp(176px, 46vw, 304px);
+  height: clamp(144px, 34vh, 264px);
   opacity: 0;
   pointer-events: none;
   /* background-image approach: full image at 2× width so each half fills container */
@@ -873,13 +873,13 @@ function triggerBreak() {
   // Left piece drops lower-left
   top.animate([
     { transform: 'translate(-50%,-50%) translateX(0) translateY(0) rotate(0deg)' },
-    { transform: 'translate(-50%,-50%) translateX(-43px) translateY(38px) rotate(-23deg)' }
+    { transform: 'translate(-50%,-50%) translateX(-65px) translateY(57px) rotate(-35deg)' }
   ], opts);
 
   // Right piece flies upper-right
   bot.animate([
     { transform: 'translate(-50%,-50%) translateX(0) translateY(0) rotate(0deg)' },
-    { transform: 'translate(-50%,-50%) translateX(53px) translateY(-20px) rotate(11deg)' }
+    { transform: 'translate(-50%,-50%) translateX(80px) translateY(-30px) rotate(17deg)' }
   ], { ...opts, delay: 14 });
 
   // Shards — make visible for animation
