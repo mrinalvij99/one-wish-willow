@@ -328,47 +328,52 @@ body::after {
   position: absolute;
   top: 50%; left: 50%;
   transform: translate(-50%, -50%);
-  width: clamp(300px, 72vw, 520px);
-  height: clamp(80px, 19vh, 140px);
+  /* Match original stick width so each half piece appears at same visual scale */
+  width: clamp(220px, 58vw, 380px);
+  height: clamp(180px, 42vh, 330px);
   opacity: 0;
   pointer-events: none;
+  /* background-image approach: full image at 2× width so each half fills container */
+  background-image: url('stick breaking.png');
+  background-size: 200% auto;
+  background-repeat: no-repeat;
+  mix-blend-mode: screen;
 }
-/* Smooth atmospheric glow behind each piece */
+/* Soft atmospheric radial glow — stays inside element so it fades with the mask */
 .break-piece::before {
   content: '';
   position: absolute;
-  inset: -55%;
-  border-radius: 50%;
+  inset: 0;
+  background: radial-gradient(ellipse 90% 80% at center,
+    rgba(255,52,0,0.42) 0%,
+    rgba(210,8,0,0.20) 48%,
+    rgba(160,0,0,0.07) 68%,
+    transparent 82%);
   pointer-events: none;
-  background: radial-gradient(ellipse 80% 65% at center,
-    rgba(255,50,0,0.38) 0%,
-    rgba(210,10,0,0.18) 40%,
-    rgba(160,0,0,0.06) 62%,
-    transparent 75%);
-  z-index: 0;
 }
-.break-piece img {
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  display: block;
-  mix-blend-mode: screen;
-  /* Soft wide glow — no hard edges */
-  filter: drop-shadow(0 0 22px rgba(255,65,0,0.5))
-          drop-shadow(0 0 55px rgba(215,0,0,0.28))
-          drop-shadow(0 0 100px rgba(180,0,0,0.12));
+/* Left piece: left half of breaking image, fade right + top + bottom */
+#piece-top {
+  background-position: 0% center;
+  -webkit-mask-image:
+    linear-gradient(to right, black 22%, black 46%, transparent 62%),
+    linear-gradient(to bottom, transparent 0%, black 18%, black 82%, transparent 100%);
+  mask-image:
+    linear-gradient(to right, black 22%, black 46%, transparent 62%),
+    linear-gradient(to bottom, transparent 0%, black 18%, black 82%, transparent 100%);
+  -webkit-mask-composite: destination-in;
+  mask-composite: intersect;
 }
-/* Left piece: soft gradient fade at the cut line (right side) */
-#piece-top img {
-  -webkit-mask-image: linear-gradient(to right, black 18%, black 40%, transparent 56%);
-  mask-image: linear-gradient(to right, black 18%, black 40%, transparent 56%);
-}
-/* Right piece: soft gradient fade at the cut line (left side) */
-#piece-bot img {
-  -webkit-mask-image: linear-gradient(to right, transparent 44%, black 60%, black 82%);
-  mask-image: linear-gradient(to right, transparent 44%, black 60%, black 82%);
+/* Right piece: right half of breaking image, fade left + top + bottom */
+#piece-bot {
+  background-position: 100% center;
+  -webkit-mask-image:
+    linear-gradient(to right, transparent 38%, black 54%, black 78%),
+    linear-gradient(to bottom, transparent 0%, black 18%, black 82%, transparent 100%);
+  mask-image:
+    linear-gradient(to right, transparent 38%, black 54%, black 78%),
+    linear-gradient(to bottom, transparent 0%, black 18%, black 82%, transparent 100%);
+  -webkit-mask-composite: destination-in;
+  mask-composite: intersect;
 }
 
 /* ─── Input section ───────────────────────────────────────── */
@@ -664,13 +669,9 @@ body::after {
         </div>
       </div>
 
-      <!-- Broken pieces (hidden until breaking) — using PNG with screen blend -->
-      <div class="break-piece" id="piece-top">
-        <img src="stick breaking.png" alt="" draggable="false">
-      </div>
-      <div class="break-piece" id="piece-bot">
-        <img src="stick breaking.png" alt="" draggable="false">
-      </div>
+      <!-- Broken pieces (hidden until breaking) — background-image with screen blend -->
+      <div class="break-piece" id="piece-top"></div>
+      <div class="break-piece" id="piece-bot"></div>
 
       <!-- Shard splinters -->
       <div id="shards"></div>
@@ -869,16 +870,16 @@ function triggerBreak() {
 
   const opts = { duration: 860, fill: 'forwards', easing: 'cubic-bezier(0.18,0,0.68,1)' };
 
-  // Left piece drops lower-left, rotating steep
+  // Left piece drops lower-left
   top.animate([
     { transform: 'translate(-50%,-50%) translateX(0) translateY(0) rotate(0deg)' },
-    { transform: 'translate(-50%,-50%) translateX(-62px) translateY(56px) rotate(-34deg)' }
+    { transform: 'translate(-50%,-50%) translateX(-34px) translateY(30px) rotate(-18deg)' }
   ], opts);
 
-  // Right piece flies upper-right, staying flatter
+  // Right piece flies upper-right
   bot.animate([
     { transform: 'translate(-50%,-50%) translateX(0) translateY(0) rotate(0deg)' },
-    { transform: 'translate(-50%,-50%) translateX(76px) translateY(-30px) rotate(13deg)' }
+    { transform: 'translate(-50%,-50%) translateX(42px) translateY(-16px) rotate(9deg)' }
   ], { ...opts, delay: 14 });
 
   // Shards — make visible for animation
